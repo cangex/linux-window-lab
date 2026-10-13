@@ -1,0 +1,183 @@
+{
+  "date": "2026-10-13",
+  "status": "passed",
+  "environment": "QEMU/KVM q35, lwlab-boot, 8 vCPU, 16 GiB; AP 4, Linux CPUs 0-3",
+  "source": "/data/linux-window-lab/artifacts/p2/validation-ipi-fixed",
+  "verification": {
+    "pass": true,
+    "cold_boots": 10,
+    "efi_checks_per_boot": 9,
+    "samples": 649,
+    "max_tcp_gap_seconds": 1.6578447977080941,
+    "long_seconds": 300
+  },
+  "firmware_sha256": "8c7a21ed02127a44506995138b9ec47850adf2160ee72d15974575033ffc1cd7",
+  "kernel_sha256": "51dd6182ab3bcc4dc4d152c13dfb5c779d5b38ee1828cd5e710b10eb0dc25869",
+  "raw_archive_sha256": "3152740e73c7391a7255bad872f448656029aae872107cc33832c93a5cf892db",
+  "required_kernel_command_line": [
+    "zdu_pool=256M@0x40000000",
+    "8250.nr_uarts=1",
+    "no_ipi_broadcast=1",
+    "nokaslr",
+    "no5lvl"
+  ],
+  "prior_failed_attempt": {
+    "source": "/data/linux-window-lab/artifacts/p2/validation-final",
+    "passed_before_failure": 6,
+    "failed_cold_boot": 7,
+    "start_errno": 110,
+    "efi_checks": "0x1f",
+    "apic_isr": [
+      252
+    ],
+    "apic_irr": [
+      64,
+      252
+    ],
+    "diagnosis": "Linux shorthand CALL_FUNCTION_VECTOR broadcast reached the offlined AP and blocked lower-priority timer vector 0x40",
+    "fix": "no_ipi_broadcast=1; unexpected IRQ handler; extend timer self-test to 100 events",
+    "linux_survived": true
+  },
+  "runs": [
+    {
+      "name": "cold-01",
+      "pass": true,
+      "boot_id": "05b64637-e76f-4c46-9ab3-6570be405c59",
+      "generation": 848065527287998578,
+      "seconds_after_start": 300,
+      "samples": 307,
+      "max_tcp_gap_seconds": 1.6438171891495585,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 212,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-02",
+      "pass": true,
+      "boot_id": "5487f5ea-0c6f-48a5-a030-8ef0fa4d2c40",
+      "generation": 390220010005325403,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6435849401168525,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 212,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-03",
+      "pass": true,
+      "boot_id": "6f7873b0-cfe9-49bc-94b5-70b6eceed61e",
+      "generation": 185250325523039251,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6460431423038244,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-04",
+      "pass": true,
+      "boot_id": "690a33a1-0655-455c-844b-883e80076a93",
+      "generation": 154648721820452751,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6464799148961902,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-05",
+      "pass": true,
+      "boot_id": "9afe1ee6-42d6-4681-bd84-4ce0b2316b1d",
+      "generation": 743836020087034967,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6424888828769326,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-06",
+      "pass": true,
+      "boot_id": "1758eb77-6c05-4a90-b100-09281237d4c1",
+      "generation": 44091654188934815,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6472693337127566,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-07",
+      "pass": true,
+      "boot_id": "9ce15dfd-9cfc-4f0f-b5d2-38497db291b1",
+      "generation": 623313217179014005,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6465138089843094,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-08",
+      "pass": true,
+      "boot_id": "cbc44970-04a3-413f-b348-ab070fe130bd",
+      "generation": 274740042284063201,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6522988229990005,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-09",
+      "pass": true,
+      "boot_id": "01c6bd9f-9e4b-44da-a29d-8fd468f13383",
+      "generation": 881279614278700650,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6578447977080941,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    },
+    {
+      "name": "cold-10",
+      "pass": true,
+      "boot_id": "8c2c8d50-d2c1-4e07-aec7-04e11d1e6005",
+      "generation": 312907380595744042,
+      "seconds_after_start": 30,
+      "samples": 38,
+      "max_tcp_gap_seconds": 1.6418531187810004,
+      "ping_failures": 0,
+      "efi_checks": "0x1ff",
+      "timer_ticks": 211,
+      "kernel_taint": 0,
+      "negative_checks": 12
+    }
+  ]
+}

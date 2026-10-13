@@ -1,0 +1,26 @@
+[Defines]
+ INF_VERSION = 0x00010005
+ BASE_NAME = LwPlatformDxe
+ FILE_GUID = f6c84d76-1388-40a3-906a-6e2a90ebea29
+ MODULE_TYPE = DXE_DRIVER
+ VERSION_STRING = 1.0
+ ENTRY_POINT = LwPlatformEntry
+[Sources]
+ LwPlatformDxe.c
+[Packages]
+ MdePkg/MdePkg.dec
+ LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ CpuLib
+ UefiDriverEntryPoint
+ UefiBootServicesTableLib
+ BaseMemoryLib
+ BaseLib
+ DebugLib
+[Protocols]
+ gEfiBlockIoProtocolGuid
+ gEfiDevicePathProtocolGuid
+[Guids]
+ gEfiAcpi20TableGuid
+[Depex]
+ TRUE

@@ -1,0 +1,16 @@
+[Defines]
+  INF_VERSION = 0x00010005
+  BASE_NAME = LwTimerLib
+  FILE_GUID = 19039ed2-542f-41b9-8b9b-9345cc68de10
+  MODULE_TYPE = BASE
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS = TimerLib
+  CONSTRUCTOR = LwTimerConstructor
+[Sources]
+  LwTimerLib.c
+[Packages]
+  MdePkg/MdePkg.dec
+  LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ CpuLib
+  BaseLib

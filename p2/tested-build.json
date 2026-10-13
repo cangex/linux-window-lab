@@ -1,0 +1,129 @@
+{
+  "kernel_release": "6.18.0-rc3-lwlab-p2",
+  "kernel_sha256": "51dd6182ab3bcc4dc4d152c13dfb5c779d5b38ee1828cd5e710b10eb0dc25869",
+  "kernel_config_sha256": "d7837a3bde40c5a5f07c46671f8e8d8a61ad073715cd478f826bd8b2d5eca14b",
+  "firmware_sha256": "8c7a21ed02127a44506995138b9ec47850adf2160ee72d15974575033ffc1cd7",
+  "toolchain": {
+    "gcc": "13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04.1)",
+    "nasm": "2.16.01",
+    "iasl": "20230628",
+    "python": "3.12.3",
+    "make": "4.3"
+  },
+  "layout": {
+    "manifest": {
+      "version": 2,
+      "linux_cpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "offline_cpus": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "boot_cpu": 4,
+      "apic_id": 4,
+      "memory_base": "0x40000000",
+      "memory_size": "0x10000000",
+      "entry_offset": "0x10000",
+      "core_offset": "0x800000",
+      "fv_offset": "0x1000000",
+      "disk_offset": "0x1800000",
+      "disk_size": "0x800000",
+      "hob_offset": "0x2000000",
+      "acpi_offset": "0x2200000",
+      "stack_offset": "0x2300000",
+      "stack_size": "0x100000",
+      "free_offset": "0x4000000",
+      "runtime_virtual_offset": "0x100000000",
+      "serial_io": "0x2f8",
+      "lapic_mmio": "0xfee00000",
+      "pci": [],
+      "ioapic": [],
+      "other_aps": "offline; no INIT/SIPI broadcast or MP Services",
+      "timer": "AP-local LAPIC; TSC frequency supplied by Linux",
+      "variables": "EDK2 emulated store in partition RAM, no persistence",
+      "reset": "record request and park partition AP; never reset whole machine",
+      "cpu_proximity_domain": 1,
+      "memory_proximity_domain": 0
+    },
+    "core_entry": "0x40814878",
+    "acpi": {
+      "DSDT": "0x42201000",
+      "APIC": "0x42202000",
+      "FACP": "0x42203000",
+      "SRAT": "0x42204000",
+      "XSDT": "0x42205000"
+    },
+    "assets": [
+      {
+        "address": "0x40010000",
+        "size": 4528,
+        "sha256": "69bfa7eba5bb1f27c2b93669a0bc1c34b32950030ba36726202e6e9c3c9141b2"
+      },
+      {
+        "address": "0x40800000",
+        "size": 180224,
+        "sha256": "9e54d22055876f8bef3b0dac4a9ddcdf485d6ff05eeadff93d6d33fe97b5657c"
+      },
+      {
+        "address": "0x41000000",
+        "size": 577536,
+        "sha256": "53b5579190ecd64d69ae4084ef1e7edb9e7a8785af07e9862f535e652d5d16a7"
+      },
+      {
+        "address": "0x41800000",
+        "size": 8388608,
+        "sha256": "856dcc69d264c5646fe1e7333ce9176aaa7b451f14c4910ef9e92a02ee5f4f1e"
+      },
+      {
+        "address": "0x42000000",
+        "size": 656,
+        "sha256": "c4187f4afe83653f940d8b6df70419d20aefdcec1a4ebda066716aaef00ae0fd"
+      },
+      {
+        "address": "0x42200000",
+        "size": 65536,
+        "sha256": "9272df378bb60a746764dfac2bfc46ec486d804fbfceb1922f7990fda6005e0b"
+      }
+    ],
+    "payload_sha256": "8c7a21ed02127a44506995138b9ec47850adf2160ee72d15974575033ffc1cd7"
+  },
+  "firmware_source_sha256": {
+    "LwPartitionPkg/Child/Child.c": "2892d77219eed8409d66f9df916fa5313c358e3a73435aa6a7bf8afbb5345f9a",
+    "LwPartitionPkg/Child/Child.inf": "eff532261732f734ae2a4938b9e1cad9293495dbf2fded0943788b8a440be64b",
+    "LwPartitionPkg/Include/LwLab.h": "7410d3edccd51d8a03751a6c3bff30c35dec9c18317ceb7d0d6559f8cf7edee5",
+    "LwPartitionPkg/Include/Platform.h": "95e6dd9c49926a658b28630c4e203d1fa1d15797684841257db629871b5245f7",
+    "LwPartitionPkg/Library/LwTimerLib/LwTimerLib.c": "c71b26450e0ba9b685265c7aa208d06099cda6be327ed8277ad8e1e0b1c66be2",
+    "LwPartitionPkg/Library/LwTimerLib/LwTimerLib.inf": "952c4fc237dd85536f78114114061c82d9417c0667738f85ddf489aa0e3d528b",
+    "LwPartitionPkg/LwBdsDxe/LwBdsDxe.c": "3c5e541e80faab1d75af48fca4c88ec7b85c9b279a43a59b9694bd621eb19f65",
+    "LwPartitionPkg/LwBdsDxe/LwBdsDxe.inf": "fa06ac514cbbf10ac32589cce93b17dbe74406ddd4927eb60c1fc566468f0949",
+    "LwPartitionPkg/LwCpuDxe/LwCpuDxe.c": "b9566b568361922b2c59c41b2f7cdee28c3b4da4fab93824d6741c3552e5dc6e",
+    "LwPartitionPkg/LwCpuDxe/LwCpuDxe.inf": "b5b6c0e171a6130699e9a005e2a3977d225b312512a46d4aa52de95ba75c400e",
+    "LwPartitionPkg/LwPartitionPkg.dec": "70fa034a3b3fca0f980860e0fdd6b90ccf6d1ac95e3e5dc4a5db0a5e35cccdd4",
+    "LwPartitionPkg/LwPartitionPkg.dsc": "ba4de0443e7e45f1ad643cd5ced8bd8c5662e56ce559d6813f084ab7c58c777c",
+    "LwPartitionPkg/LwPartitionPkg.fdf": "d91138c1f06bbfd57dfe4de1f9e09088a92c99153eb27fe1e74228c1f63fce1b",
+    "LwPartitionPkg/LwPlatformDxe/LwPlatformDxe.c": "ae34318e72a63bcb84f45f94d34dc3b7ed3af5d43e4ee44d7cf41a4b4fed0737",
+    "LwPartitionPkg/LwPlatformDxe/LwPlatformDxe.inf": "8c4bec7bebd1a43765119c3261e568abfaa64a519ba326a08325efd53dbae0b0",
+    "LwPartitionPkg/LwRuntimeDxe/LwRuntimeDxe.c": "4d2fc0606dee5f71a598d448fd1f1d3e69d2db471039f99b7cccbb90b50f6a13",
+    "LwPartitionPkg/LwRuntimeDxe/LwRuntimeDxe.inf": "6d58c5631bf2e5b886d02dbf9db273a4ccba5301999c3149a99d0e332b2642c3",
+    "LwPartitionPkg/SelfTest/SelfTest.c": "603cda1b041d7cef02fd13a61f3768430894640a0a091b5a557632fd0def3ac8",
+    "LwPartitionPkg/SelfTest/SelfTest.inf": "fba84c5b5729d34aad9d20f209ee8fe0a868847005e2d967fd059850f0b21ed0",
+    "bootstrap.asm": "2df2585857bf4294d9fb434892c1207a7dc8bbc8bdf323251b1c2e8e4cb1cd94",
+    "pack.py": "016833eb2fa0339fe2771a1226c89e5d77c744890eb14585a1f170ca7537e597",
+    "partition.json": "9bd992e6578a4c2ed7d1843eeff1619faa7e16ead9357df4021e2ec50a9fba45",
+    "platform.inc": "157016fab60b4e74661ef8bb0db40970e781d118f61f915dfccc46be925ae05f"
+  },
+  "kernel_overlay_sha256": "517a2ed684566cfe03c048f6630310a09f6021f732281361146141b309b31455",
+  "required_kernel_command_line": [
+    "zdu_pool=256M@0x40000000",
+    "8250.nr_uarts=1",
+    "no_ipi_broadcast=1",
+    "nokaslr",
+    "no5lvl"
+  ]
+}

@@ -2,9 +2,11 @@
 
 目标：Linux 持续运行，在划分的 CPU、内存和设备资源上启动 Windows，并由 Linux 从外部读取和解析 Windows 数据。项目不以两系统间的安全隔离为验收目标。
 
-当前已完成 **P1：AP 启动基础**。独立的 `lwlab-boot` 在主 Linux 持续运行时启动单 AP payload，通过 10 次冷启动、30 分钟连续性和两类故障注入。尚未实现分区 UEFI、Windows 并行启动或 Windows 数据读取。
+当前已完成 **P2：分区 UEFI 与平台描述**。独立的 `lwlab-boot` 在主 Linux 持续运行时启动 AP 上的 EDK2 UEFI，10 次冷启动均通过九项 EFI 自检及 Linux 连续性检查。尚未启动 Windows/WinPE 或实现 Windows 数据读取。
 
 2026-10-13 的服务器环境已通过 P0 验收，详见 [准备结果](docs/2026-10-13-preparation.md)。
+
+P2 实测结果见 [验收报告](docs/2026-10-13-p2.md)，构建和复现命令见 [P2 使用说明](p2/README.md)。P2 修复了 Linux 广播 IPI 干扰已移交 AP 的问题，启动参数必须包含 `no_ipi_broadcast=1`。
 
 P1 实测结果见 [验收报告](docs/2026-10-13-p1.md)，构建和复现命令见 [P1 使用说明](p1/README.md)。
 
@@ -76,7 +78,7 @@ sudo virsh -c qemu:///system domdisplay lwlab-dev
 | P3 WinPE | `bootmgfw.efi → winload.efi → WinPE` 在分区内启动；Linux 连续性同时通过 |
 | P4 数据观察 | 对带序号和校验值的测试数据进行 Linux 外部读取和一致性验证 |
 
-外层 OVMF 负责首次启动 Linux。分区 UEFI 是另外需要实现的 payload，不能把完整 OVMF 固件当成现成的 multikernel kexec 镜像。现有 Linux AP trampoline 的 `boot_params` 约定也需要适配。资源描述应覆盖 ACPI、APIC、PCI、低端 trampoline 内存和固件运行时状态。
+外层 OVMF 负责首次启动 Linux。P2 的分区 UEFI 使用独立 DXE payload，不能把完整 OVMF 固件当成现成的 multikernel kexec 镜像。Linux AP trampoline 已适配项目 handoff。资源描述应覆盖 ACPI、APIC、PCI、低端 trampoline 内存和固件运行时状态。
 
 Windows 11 x64 WinPE 的制作步骤见 [docs/winpe.md](docs/winpe.md)。当前没有 WinPE 镜像，Windows 启动阶段尚未开始。
 

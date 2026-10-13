@@ -1,0 +1,16 @@
+[Defines]
+ INF_VERSION = 0x0001001B
+ BASE_NAME = P2Child
+ FILE_GUID = 1aaf0c41-2f81-4118-817c-038ac0c21889
+ MODULE_TYPE = UEFI_APPLICATION
+ VERSION_STRING = 0.1
+ ENTRY_POINT = ChildMain
+[Sources]
+ Child.c
+[Packages]
+ MdePkg/MdePkg.dec
+ LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ CpuLib
+ UefiApplicationEntryPoint
+ BaseLib

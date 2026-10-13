@@ -1,6 +1,6 @@
 # Linux–Windows multikernel 开发计划
 
-更新：2026-10-13。状态：P0、P1 已完成；P2 及后续尚未执行。P1 的 10 次冷启动、30 分钟连续性及故障注入结果见 [验收报告](2026-10-13-p1.md)。
+更新：2026-10-13。状态：P0、P1、P2 已完成；P3 及后续尚未执行。P2 的 10 次冷启动、九项 EFI 自检及平台协调结果见 [P2 验收报告](2026-10-13-p2.md)。P1 的 10 次冷启动、30 分钟连续性及故障注入结果见 [验收报告](2026-10-13-p1.md)。
 
 ## 目标与当前起点
 
@@ -61,6 +61,8 @@ P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发
 验收：10 次独立冷启动均有正确的目标握手；至少一次连续 30 分钟心跳与 Linux 网络/文件 I/O 检查；非法入口、未下线 CPU、越界内存和错误交接版本均被拒绝。结果包含 Linux boot ID、payload generation、内核与镜像哈希。
 
 ## P2：独立的分区 UEFI
+
+已完成：固定分区 EDK2 DXE、HOB/ACPI、只读内存盘、AP 本地定时器及所测 runtime 服务通过 10 次冷启动。Linux 需禁用 shorthand IPI 广播并独占 COM1；详见 [实现和限制](../p2/README.md)。
 
 采用 EDK2 `UefiPayloadPkg` 作为候选起点，而不是把整机 `OVMF_CODE.fd` 直接当作 kexec 镜像。先固定 EDK2 提交，再适配入口/HOB 或对应版本支持的交接结构，只描述本分区。
 
@@ -141,7 +143,7 @@ Linux 侧实现限定实验分区范围的只读后端，避免依赖 `/dev/mem`
 
 ## 代码组织与结果记录
 
-拟增加 `sources.lock.json`、`patches/linux/`、`patches/kexec-tools/`、`firmware/LwPartitionPkg/`、`payloads/ap-probe/`、`observer/`、`windows/marker/`、`tests/` 与 `configs/`。P1 的当前交付集中在 `p1/`：源码锁定、覆盖层、完整配置、构建安装脚本、payload 和验收工具；其余目录为后续规划。
+拟增加 `sources.lock.json`、`patches/linux/`、`patches/kexec-tools/`、`firmware/LwPartitionPkg/`、`payloads/ap-probe/`、`observer/`、`windows/marker/`、`tests/` 与 `configs/`。P1 的当前交付集中在 `p1/`：源码锁定、覆盖层、完整配置、构建安装脚本、payload 和验收工具；P2 交付集中在 `p2/`：固件组件、资源生成器、内核覆盖层、源码锁定、构建安装与验收工具；其余目录为后续规划。
 
 单一版本化资源清单作为 loader、UEFI 生成和验收工具的共同输入，包含 CPU/APIC 映射、带类型的物理内存区间、设备和寄存器归属、串口、mailbox、固件策略。物理内存区间和映射属性必须显式校验，不依靠默认假设。
 

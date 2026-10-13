@@ -1,0 +1,30 @@
+[Defines]
+ INF_VERSION = 0x00010005
+ BASE_NAME = LwCpuDxe
+ FILE_GUID = fd2105ac-b5b5-4196-b193-57822cfa94c8
+ MODULE_TYPE = DXE_DRIVER
+ VERSION_STRING = 1.0
+ ENTRY_POINT = LwCpuEntry
+[Sources]
+ LwCpuDxe.c
+[Packages]
+ MdePkg/MdePkg.dec
+ MdeModulePkg/MdeModulePkg.dec
+ UefiCpuPkg/UefiCpuPkg.dec
+ OvmfPkg/OvmfPkg.dec
+ LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ CpuLib
+ UefiDriverEntryPoint
+ UefiBootServicesTableLib
+ BaseLib
+ IoLib
+ TimerLib
+ NestedInterruptTplLib
+ CpuExceptionHandlerLib
+ DebugLib
+[Protocols]
+ gEfiCpuArchProtocolGuid
+ gEfiTimerArchProtocolGuid
+[Depex]
+ TRUE

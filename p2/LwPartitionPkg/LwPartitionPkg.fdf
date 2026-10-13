@@ -1,0 +1,70 @@
+[FV.LWFV]
+FvNameGuid = 8063C21A-8E58-4576-95CE-089E87975D23
+BlockSize = 0x1000
+FvAlignment = 16
+FvForceRebase = FALSE
+ERASE_POLARITY = 1
+MEMORY_MAPPED = TRUE
+READ_STATUS = TRUE
+WRITE_STATUS = FALSE
+APRIORI DXE {
+ INF MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+ INF LwPartitionPkg/LwCpuDxe/LwCpuDxe.inf
+}
+INF MdeModulePkg/Core/Dxe/DxeMain.inf
+INF MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
+INF LwPartitionPkg/LwCpuDxe/LwCpuDxe.inf
+INF LwPartitionPkg/LwPlatformDxe/LwPlatformDxe.inf
+INF LwPartitionPkg/LwRuntimeDxe/LwRuntimeDxe.inf
+INF MdeModulePkg/Universal/Metronome/Metronome.inf
+INF MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
+INF MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
+INF MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
+INF MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
+INF MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
+INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+INF FatPkg/EnhancedFatDxe/Fat.inf
+INF LwPartitionPkg/LwBdsDxe/LwBdsDxe.inf
+
+[Rule.Common.DXE_CORE]
+ FILE DXE_CORE = $(NAMED_GUID) {
+  DXE_DEPEX DXE_DEPEX Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+  PE32 PE32 $(INF_OUTPUT)/$(MODULE_NAME).efi
+  UI STRING = "$(MODULE_NAME)" Optional
+  VERSION STRING = "$(INF_VERSION)" Optional BUILD_NUM = $(BUILD_NUMBER)
+ }
+
+[Rule.Common.DXE_DRIVER]
+ FILE DRIVER = $(NAMED_GUID) {
+  DXE_DEPEX DXE_DEPEX Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+  PE32 PE32 $(INF_OUTPUT)/$(MODULE_NAME).efi
+  UI STRING = "$(MODULE_NAME)" Optional
+  VERSION STRING = "$(INF_VERSION)" Optional BUILD_NUM = $(BUILD_NUMBER)
+ }
+
+[Rule.Common.DXE_RUNTIME_DRIVER]
+ FILE DRIVER = $(NAMED_GUID) {
+  DXE_DEPEX DXE_DEPEX Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+  PE32 PE32 $(INF_OUTPUT)/$(MODULE_NAME).efi
+  UI STRING = "$(MODULE_NAME)" Optional
+  VERSION STRING = "$(INF_VERSION)" Optional BUILD_NUM = $(BUILD_NUMBER)
+ }
+
+[Rule.Common.UEFI_DRIVER]
+ FILE DRIVER = $(NAMED_GUID) {
+  DXE_DEPEX DXE_DEPEX Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+  PE32 PE32 $(INF_OUTPUT)/$(MODULE_NAME).efi
+  UI STRING = "$(MODULE_NAME)" Optional
+  VERSION STRING = "$(INF_VERSION)" Optional BUILD_NUM = $(BUILD_NUMBER)
+ }
+
+[Rule.Common.UEFI_APPLICATION]
+ FILE APPLICATION = $(NAMED_GUID) {
+  DXE_DEPEX DXE_DEPEX Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+  PE32 PE32 $(INF_OUTPUT)/$(MODULE_NAME).efi
+  UI STRING = "$(MODULE_NAME)" Optional
+  VERSION STRING = "$(INF_VERSION)" Optional BUILD_NUM = $(BUILD_NUMBER)
+ }

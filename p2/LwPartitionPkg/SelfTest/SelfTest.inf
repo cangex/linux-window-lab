@@ -1,0 +1,27 @@
+[Defines]
+ INF_VERSION = 0x0001001B
+ BASE_NAME = P2SelfTest
+ FILE_GUID = 1aaf0c41-2f81-4118-817c-038ac0c21888
+ MODULE_TYPE = UEFI_APPLICATION
+ VERSION_STRING = 0.1
+ ENTRY_POINT = P2Main
+[Sources]
+ SelfTest.c
+[Packages]
+ MdePkg/MdePkg.dec
+ LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ CpuLib
+ UefiApplicationEntryPoint
+ BaseLib
+ UefiBootServicesTableLib
+ UefiRuntimeServicesTableLib
+ DevicePathLib
+ BaseMemoryLib
+ DebugLib
+[Protocols]
+ gEfiLoadedImageProtocolGuid
+ gEfiSimpleFileSystemProtocolGuid
+[Guids]
+ gEfiAcpi20TableGuid
+ gEfiEventExitBootServicesGuid

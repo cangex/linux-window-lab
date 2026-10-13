@@ -1,0 +1,26 @@
+[Defines]
+ INF_VERSION = 0x00010005
+ BASE_NAME = LwRuntimeDxe
+ FILE_GUID = af256721-ce92-46b5-a6ca-dd46a0d5aa07
+ MODULE_TYPE = DXE_RUNTIME_DRIVER
+ VERSION_STRING = 1.0
+ ENTRY_POINT = LwRuntimeEntry
+[Sources]
+ LwRuntimeDxe.c
+[Packages]
+ MdePkg/MdePkg.dec
+ LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ CpuLib
+ UefiDriverEntryPoint
+ UefiBootServicesTableLib
+ UefiRuntimeServicesTableLib
+ UefiRuntimeLib
+ BaseLib
+[Protocols]
+ gEfiResetArchProtocolGuid
+ gEfiRealTimeClockArchProtocolGuid
+[Guids]
+ gEfiEventVirtualAddressChangeGuid
+[Depex]
+ TRUE

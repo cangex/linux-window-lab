@@ -1,0 +1,19 @@
+; Generated from partition.json
+%define LW_BASE 0x40000000
+%define LW_SIZE 0x10000000
+%define LW_END 0x50000000
+%define LW_ENTRY 0x40010000
+%define LW_CORE 0x40800000
+%define LW_FV 0x41000000
+%define LW_DISK 0x41800000
+%define LW_DISK_SIZE 0x800000
+%define LW_HOB 0x42000000
+%define LW_ACPI 0x42200000
+%define LW_STACK_BASE 0x42300000
+%define LW_STACK 0x42400000
+%define LW_FREE 0x44000000
+%define LW_VIRTUAL_OFFSET 0x100000000
+%define LW_SERIAL 0x2f8
+%define LW_APIC 0x4
+%define LW_CPU 0x4
+%define LW_LAPIC 0xfee00000

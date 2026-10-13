@@ -1,0 +1,7 @@
+[Defines]
+  DEC_SPECIFICATION = 0x00010005
+  PACKAGE_NAME = LwPartitionPkg
+  PACKAGE_GUID = 346ce9e0-d8a7-4a9a-820a-e45f5c801d91
+  PACKAGE_VERSION = 0.1
+[Includes]
+  Include
