@@ -2,9 +2,11 @@
 
 目标：Linux 持续运行，在划分的 CPU、内存和设备资源上启动 Windows，并由 Linux 从外部读取和解析 Windows 数据。项目不以两系统间的安全隔离为验收目标。
 
-当前阶段是 **QEMU/KVM + OVMF 实验环境准备**。现有脚本创建普通 Ubuntu 开发 VM；尚未实现分区 UEFI、Windows 并行启动或 Windows 数据读取。
+当前已完成 **P1：AP 启动基础**。独立的 `lwlab-boot` 在主 Linux 持续运行时启动单 AP payload，通过 10 次冷启动、30 分钟连续性和两类故障注入。尚未实现分区 UEFI、Windows 并行启动或 Windows 数据读取。
 
 2026-10-13 的服务器环境已通过 P0 验收，详见 [准备结果](docs/2026-10-13-preparation.md)。
+
+P1 实测结果见 [验收报告](docs/2026-10-13-p1.md)，构建和复现命令见 [P1 使用说明](p1/README.md)。
 
 后续阶段、验收条件和首轮开发安排见 [开发计划](docs/development-plan.md)。
 
@@ -21,7 +23,7 @@
 | 控制台 | 两个串口；VNC 仅监听宿主机回环地址 |
 | 数据目录 | 宿主机 `/data/linux-window-lab` |
 
-虚拟 NUMA 拓扑用于早期功能实验，尚未设置宿主机 CPU 独占或 NUMA 内存绑定，因此不能直接用于性能结论。当前 Linux 可见全部 VM 资源；4+4 核只是后续划分候选方案。
+虚拟 NUMA 拓扑用于早期功能实验，尚未设置宿主机 CPU 独占或 NUMA 内存绑定，因此不能直接用于性能结论。`lwlab-dev` 继续使用全部资源作为构建环境。另建的 `lwlab-boot` 使用两个插槽分别对应两个 NUMA 节点；P1 测试期间 Linux 使用 CPU 0–3，CPU 4 运行 payload，5–7 保持下线。
 
 ## 在 Ubuntu 24.04 x86-64 宿主机准备
 

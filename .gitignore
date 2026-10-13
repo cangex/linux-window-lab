@@ -3,6 +3,7 @@ __pycache__/
 images/
 keys/
 state/
+state-p1/
 artifacts/
 baselines/
 config/

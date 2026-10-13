@@ -1,0 +1,23 @@
+{
+  "linux": {
+    "repository": "https://github.com/cangex/zero-down-time-kernel-update.git",
+    "commit": "d75950ccbae6f5f651d4a9fd0701de1819c30579",
+    "archive_sha256": "cfd75b0cd4b8a131b7f8617f0d8d8843346624a56ef7b63ea63ab473da3910d6",
+    "version": "6.18.0-rc3",
+    "overlay": "p1/apply.py and p1/kernel/lwlab.c",
+    "license": "GPL-2.0-only; retain upstream COPYING and file notices",
+    "overlay_inputs_sha256": {
+      "arch/x86/kernel/smpboot.c": "a82c1a533efcfb58272b22aaf55e928451785e90998f566da6d076300b7f64c4",
+      "kernel/Makefile": "1b52cb57e5b3945976acf6726d39e118abe16ae12c669b6d8340687bb6dec44b",
+      "kernel/zdu/Kconfig": "24f5a06a10dfd0d8366787cfadadf7d9d123ed4d1608b2493ee40102789cbc73"
+    }
+  },
+  "loader": "P1 firmware loader plus AP trampoline; kexec-tools is not used by the flat test payload",
+  "edk2": "Not used until P2; outer OVMF remains the P0 version",
+  "guest_physical_memory": {
+    "start": "0x180000000",
+    "size": "0x1000000"
+  },
+  "payload_entry": "0x180010000",
+  "handoff_version": 1
+}

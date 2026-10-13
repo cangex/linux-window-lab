@@ -1,18 +1,18 @@
 # Linux–Windows multikernel 开发计划
 
-更新：2026-10-13。状态：计划，尚未执行 P1 及后续实验。
+更新：2026-10-13。状态：P0、P1 已完成；P2 及后续尚未执行。P1 的 10 次冷启动、30 分钟连续性及故障注入结果见 [验收报告](2026-10-13-p1.md)。
 
 ## 目标与当前起点
 
 目标是在同一物理机器的不同资源分区中运行 Linux 与 Windows，由 Linux 组织启动，并从 Windows 常规访问控制接口之外读取和理解其数据。优先探索无常驻虚拟化层的方案；是否能满足这一目标，必须通过共享平台状态和 Windows 初始化实验判断。
 
-P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发 VM，工具链、UEFI 启动、I/O 和冷启动检查通过，具有冷备份。当前 guest 是普通 Ubuntu 内核，全部 CPU 和内存仍归 Linux；尚未部署 multikernel 内核，也没有 WinPE 镜像。
+P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发 VM，工具链、UEFI 启动、I/O 和冷启动检查通过，具有冷备份。`lwlab-dev` 保留普通 Ubuntu 内核。P1 已在独立 `lwlab-boot` 部署定制内核、静态预留 RAM 与 AP payload；目前仍没有 WinPE 镜像。
 
 第一项可展示成果定义为：**Linux 的用户态和 I/O 持续运行，指定 AP 执行独立 payload，Linux 能读到目标 CPU 回写的启动阶段和心跳。**
 
 ## 实验组织与范围
 
-- `lwlab-dev` 保留为构建环境。P1 开始时，从冷备份派生独立的 `lwlab-boot` 目标 VM，使用独立可写磁盘、NVRAM、MAC/IP 和日志，避免启动失败同时损坏构建环境。这些新 VM 目前尚未创建。
+- `lwlab-dev` 保留为构建环境。P1 开始时，从冷备份派生独立的 `lwlab-boot` 目标 VM，使用独立可写磁盘、NVRAM、MAC/IP 和日志，避免启动失败同时损坏构建环境。`lwlab-boot` 已在 P1 中创建并完成验证。
 - WinPE 镜像就绪后，另外创建可回滚的标准 WinPE 基线 VM，先排除镜像自身问题。正式共存实验始终发生在一台 `lwlab-boot` 内。
 - 外层 KVM/QEMU 提供可恢复的实验机器。项目内部不再套一层 Windows VM，才属于本阶段的 multikernel 路线验证；它仍不能直接证明裸机兼容性或性能收益。
 - 启动资源先静态划分。候选为 Linux 使用 vCPU 0–3，目标分区使用 4–7；先只启动其中一个目标 CPU，其余保持停驻。必须实测 Linux CPU 编号、APIC ID 和 NUMA 关系。
@@ -25,7 +25,7 @@ P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发
 | 阶段 | 开发重点 | 交付物 | 通过条件 |
 | --- | --- | --- | --- |
 | P0 | 开发环境 | VM、工具链、冷备份 | 已完成 |
-| P1 | 固定源码、资源预留、AP 启动 | 可复现主内核、入口适配、测试 payload、回归脚本 | 目标执行握手与 Linux 连续性同时通过 |
+| P1 | 固定源码、资源预留、AP 启动 | 可复现主内核、入口适配、测试 payload、回归脚本 | 已完成：10 次冷启动、30 分钟连续性、两类故障注入 |
 | P2 | 分区 UEFI 和平台描述 | EDK2 定制 payload、分区清单、EFI 自检 | 分区内服务分配/加载/退出正常，Linux 不受破坏 |
 | P3 | WinPE 并行启动 | 固定版本镜像清单、引导链日志、故障定位 | WinPE 到达用户态，Linux 同时存活并保持 I/O |
 | P4 | 已知数据外部读取 | Linux 只读后端、Windows 测试程序、一致性检查 | 数据来自运行中 WinPE，读取错误可检测，结果有真值 |
@@ -141,13 +141,13 @@ Linux 侧实现限定实验分区范围的只读后端，避免依赖 `/dev/mem`
 
 ## 代码组织与结果记录
 
-拟增加 `sources.lock.json`、`patches/linux/`、`patches/kexec-tools/`、`firmware/LwPartitionPkg/`、`payloads/ap-probe/`、`observer/`、`windows/marker/`、`tests/` 与 `configs/`。这些是规划目录，当前尚未实现。
+拟增加 `sources.lock.json`、`patches/linux/`、`patches/kexec-tools/`、`firmware/LwPartitionPkg/`、`payloads/ap-probe/`、`observer/`、`windows/marker/`、`tests/` 与 `configs/`。P1 的当前交付集中在 `p1/`：源码锁定、覆盖层、完整配置、构建安装脚本、payload 和验收工具；其余目录为后续规划。
 
 单一版本化资源清单作为 loader、UEFI 生成和验收工具的共同输入，包含 CPU/APIC 映射、带类型的物理内存区间、设备和寄存器归属、串口、mailbox、固件策略。物理内存区间和映射属性必须显式校验，不依靠默认假设。
 
 每次实验保存源码提交、配置、镜像哈希、命令、boot ID/generation、双串口、阶段状态、Linux 连续性和失败原因。完整日志在服务器，Git 保存脚本、补丁和筛选后的报告；失败报告也保留。建议阈值需在空载/负载对照中校准，不能以“零网络探测丢包”替代系统正确性。
 
-## 第一轮开发安排
+## 第一轮开发安排（原始估算，P1 已完成）
 
 以一个开发者的首个 **5–10 个工作日**作为 P1 的规划窗口，不承诺 Windows 在这个窗口启动：
 
