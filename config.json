@@ -1,0 +1,17 @@
+{
+  "qemu": "qemu-system-x86_64",
+  "machine": "pc-q35-6.0",
+  "accelerator": "tcg",
+  "cpu": "max",
+  "cpus": 4,
+  "memory_mib": 4096,
+  "firmware_descriptor": "/opt/homebrew/share/qemu/firmware/60-edk2-x86_64.json",
+  "proposed_partition": {
+    "status": "design-only; not enforced by the firmware smoke test",
+    "linux_cpu_indices": [0, 1],
+    "windows_cpu_indices": [2, 3],
+    "windows_ram_candidate_start": "0x100000000",
+    "windows_ram_candidate_end_exclusive": "0x180000000",
+    "note": "Confirm APIC IDs and actual UEFI memory descriptors before reserving RAM. Subtract payload, ACPI, mailbox and runtime regions from Windows free memory."
+  }
+}

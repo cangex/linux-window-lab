@@ -1,0 +1,14 @@
+runs/
+__pycache__/
+images/
+keys/
+state/
+artifacts/
+baselines/
+config/
+local-connection.md
+*.qcow2
+*.iso
+*.fd
+*.img
+*.pem
