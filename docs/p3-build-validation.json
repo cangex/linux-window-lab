@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "fresh_source_comparison": "identical after p3/apply.py",
+  "source_diff_bytes": 0,
+  "fresh_build_completed": true,
+  "tested_kernel_sha256": "af0fa320d2f6ade5332a5d8fe800e2ffaad4cf1e6114bcaa01268b2d66d6fdc5",
+  "fresh_kernel_sha256": "ca2e82b9160e463c2967a0312dacc0f686d0303eaba7a9e45a8d414b5573e991",
+  "tested_config_sha256": "9b61a4e42a83e432e4281a93b1e1e25cdd32f2465ab660d9b2fd92c70a881bcd",
+  "fresh_config_sha256": "9b61a4e42a83e432e4281a93b1e1e25cdd32f2465ab660d9b2fd92c70a881bcd",
+  "note": "Fresh build verifies source/config reconstruction; acceptance uses the frozen tested kernel, not the newly timestamped rebuild."
+}

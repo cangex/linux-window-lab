@@ -1,0 +1,17 @@
+DefinitionBlock ("", "DSDT", 2, "LWLAB", "PARTUEFI", 1) {
+    Scope (\_SB) {
+        Device (CPU0) {
+            Name (_HID, "ACPI0007")
+            Name (_UID, @APIC_ID@)
+        }
+        Device (UAR2) {
+            Name (_HID, EisaId ("PNP0501"))
+            Name (_UID, 2)
+            Name (_STA, 0x0F)
+            Name (_CRS, ResourceTemplate () {
+                IO (Decode16, 0x02F8, 0x02F8, 8, 8)
+                IRQNoFlags () {3}
+            })
+        }
+    }
+}

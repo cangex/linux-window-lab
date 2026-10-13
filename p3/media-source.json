@@ -1,0 +1,99 @@
+{
+  "version": "10.1.26100.9457",
+  "source_page": "https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install",
+  "installer_url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/adkwinpesetup.exe",
+  "installer_sha256": "d4de67acc83de253ccc941dd0590808d83726bdd8ea768a374a7beaff7949d6a",
+  "manifest_sha256": "ea9949990bffbf3a607e30eba1e3fe80d3b2ba4a8a8402481505f756255d5a40",
+  "files": [
+    {
+      "path": "Installers/bfdbb113d9d5201e5897ed28d0a47f42.cab",
+      "size": 18909594,
+      "sha1": "24e7757e1f5595a0d214918c7cd5c1e762eb7b05",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/bfdbb113d9d5201e5897ed28d0a47f42.cab"
+    },
+    {
+      "path": "Installers/e4ef343897232361feeab2810591d8ae.cab",
+      "size": 9873900,
+      "sha1": "00498ed2dee022b9f250b5a31433f5fdf90ab6d0",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/e4ef343897232361feeab2810591d8ae.cab"
+    },
+    {
+      "path": "Installers/f53c2cdf2f5aeeaef4ca19d4b3344930.cab",
+      "size": 1094498,
+      "sha1": "d907709a062bf2af1039fbab17b48275bd111fab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/f53c2cdf2f5aeeaef4ca19d4b3344930.cab"
+    },
+    {
+      "path": "Installers/Windows PE Boot Files (OnecoreUAP)-x86_en-us.msi",
+      "size": 602112,
+      "sha1": "52d28be4944eeac6da704b18f2e4631c9ad377aa",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Boot%20Files%20%28OnecoreUAP%29-x86_en-us.msi"
+    },
+    {
+      "path": "Installers/0b63b7c537782729483bff2d64a620fa.cab",
+      "size": 23830,
+      "sha1": "e80f986b65407e739954eaa44d35d2e4a0c54cbc",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/0b63b7c537782729483bff2d64a620fa.cab"
+    },
+    {
+      "path": "Installers/Windows PE Scripts-x86_en-us.msi",
+      "size": 573440,
+      "sha1": "6d34b9e55ec0c41af1fc810be6a1134469233015",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Scripts-x86_en-us.msi"
+    },
+    {
+      "path": "Installers/13334584cdbf659a8dd105fc34851ea3.cab",
+      "size": 21048,
+      "sha1": "7cf7d86c7e74e1797bae5d417e5298556c4e30e5",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/13334584cdbf659a8dd105fc34851ea3.cab"
+    },
+    {
+      "path": "Installers/24ab0f36f991590c112d8f31215bfe53.cab",
+      "size": 22250,
+      "sha1": "3abf9b196ae8249569041c7c5bd4709b5dddc906",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/24ab0f36f991590c112d8f31215bfe53.cab"
+    },
+    {
+      "path": "Installers/3b8aa90b3015bd30b59330184cbbb275.cab",
+      "size": 393826,
+      "sha1": "2318e9e00cb44cfafcfe30b09d349a5443f94f34",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/3b8aa90b3015bd30b59330184cbbb275.cab"
+    },
+    {
+      "path": "Installers/856a378483a6c7e8068c4f52cb49227c.cab",
+      "size": 502514,
+      "sha1": "d96c056228862174912c7a5c2d5fdc7004f56e02",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/856a378483a6c7e8068c4f52cb49227c.cab"
+    },
+    {
+      "path": "Installers/e7a23bd4ab45aa717a3e0b2fa877dce9.cab",
+      "size": 420290,
+      "sha1": "f935136099b3df03c5d1e978e81fc092edc0049a",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/e7a23bd4ab45aa717a3e0b2fa877dce9.cab"
+    },
+    {
+      "path": "Installers/Windows PE Boot Files (DesktopEditions)-x86_en-us.msi",
+      "size": 638976,
+      "sha1": "895923444ec34a8dc1f0676b2bda0307f01b31d6",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Boot%20Files%20%28DesktopEditions%29-x86_en-us.msi"
+    },
+    {
+      "path": "Installers/8686aa39453398c3a04c1edaac29ca7a.cab",
+      "size": 326737448,
+      "sha1": "11dddb84effe67c2cecf49d192390d3d395ed86e",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/8686aa39453398c3a04c1edaac29ca7a.cab"
+    },
+    {
+      "path": "Installers/a6296c5a6eec9ca02b431ed0461b952d.cab",
+      "size": 338097556,
+      "sha1": "054936166468ba70637f181a5626cfb8ec62b4af",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/a6296c5a6eec9ca02b431ed0461b952d.cab"
+    },
+    {
+      "path": "Installers/Windows PE wims (DesktopEditions)-x86_en-us.msi",
+      "size": 589824,
+      "sha1": "f081bfc7e79fd719906064089abf31c5526c7fd8",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20wims%20%28DesktopEditions%29-x86_en-us.msi"
+    }
+  ]
+}

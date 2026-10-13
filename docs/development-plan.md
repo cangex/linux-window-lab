@@ -1,12 +1,12 @@
 # Linux–Windows multikernel 开发计划
 
-更新：2026-10-13。状态：P0、P1、P2 已完成；P3 及后续尚未执行。P2 的 10 次冷启动、九项 EFI 自检及平台协调结果见 [P2 验收报告](2026-10-13-p2.md)。P1 的 10 次冷启动、30 分钟连续性及故障注入结果见 [验收报告](2026-10-13-p1.md)。
+更新：2026-10-14。状态：P0–P3 已完成；P4 及后续尚未执行。P3 在同一 VM 内通过 10 次 WinPE 冷启动与 31 分 30 秒共存检查，见 [P3 报告](2026-10-14-p3.md)。P2 的 10 次冷启动、九项 EFI 自检及平台协调结果见 [P2 验收报告](2026-10-13-p2.md)。P1 的 10 次冷启动、30 分钟连续性及故障注入结果见 [验收报告](2026-10-13-p1.md)。
 
 ## 目标与当前起点
 
 目标是在同一物理机器的不同资源分区中运行 Linux 与 Windows，由 Linux 组织启动，并从 Windows 常规访问控制接口之外读取和理解其数据。优先探索无常驻虚拟化层的方案；是否能满足这一目标，必须通过共享平台状态和 Windows 初始化实验判断。
 
-P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发 VM，工具链、UEFI 启动、I/O 和冷启动检查通过，具有冷备份。`lwlab-dev` 保留普通 Ubuntu 内核。P1 已在独立 `lwlab-boot` 部署定制内核、静态预留 RAM 与 AP payload；目前仍没有 WinPE 镜像。
+P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发 VM，工具链、UEFI 启动、I/O 和冷启动检查通过，具有冷备份。`lwlab-dev` 保留普通 Ubuntu 内核。P1 已在独立 `lwlab-boot` 部署定制内核、静态预留 RAM 与 AP payload；P3 已获得并固定官方 WinPE 介质，完成单 AP 启动和 Linux 持续运行验证。
 
 第一项可展示成果定义为：**Linux 的用户态和 I/O 持续运行，指定 AP 执行独立 payload，Linux 能读到目标 CPU 回写的启动阶段和心跳。**
 
@@ -27,7 +27,7 @@ P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发
 | P0 | 开发环境 | VM、工具链、冷备份 | 已完成 |
 | P1 | 固定源码、资源预留、AP 启动 | 可复现主内核、入口适配、测试 payload、回归脚本 | 已完成：10 次冷启动、30 分钟连续性、两类故障注入 |
 | P2 | 分区 UEFI 和平台描述 | EDK2 定制 payload、分区清单、EFI 自检 | 分区内服务分配/加载/退出正常，Linux 不受破坏 |
-| P3 | WinPE 并行启动 | 固定版本镜像清单、引导链日志、故障定位 | WinPE 到达用户态，Linux 同时存活并保持 I/O |
+| P3 | WinPE 并行启动 | 固定版本镜像清单、引导链日志、故障定位 | 已完成：10 次冷启动、31 分 30 秒共存；单 Windows CPU |
 | P4 | 已知数据外部读取 | Linux 只读后端、Windows 测试程序、一致性检查 | 数据来自运行中 WinPE，读取错误可检测，结果有真值 |
 | P5 | 完整 Windows 和语义解析 | 独占启动设备适配、完整 Windows、版本化解析器 | 持续共存，页表/进程/模块等选定对象可验证 |
 | P6 | 生命周期与 VM 实验基线 | 长稳、故障恢复、优化 KVM 对照 | 各能力分别验收，报告失败边界和成本 |
@@ -84,6 +84,8 @@ P0 已完成：`lwlab-dev` 为 8 vCPU / 16 GiB 的 QEMU/KVM + OVMF Ubuntu 开发
 验收：EFI 自检运行于被分配的 CPU；分配结果均在允许范围；通过服务退出测试后 Linux 的心跳和 I/O 仍正常；至少 10 次冷启动复现。该阶段的结果仅证明已测试服务，不等同于完整 UEFI 兼容认证。
 
 ## P3：Windows 11 x64 WinPE 并行启动
+
+已完成单 AP 验收，实测与限制见 [P3 报告](2026-10-14-p3.md)。P3 扩展为 1536 MiB 主 RAM + 两段低端 RAM，给 Windows 独占 IOAPIC/HPET，Linux 使用 `noapic hpet=disable`；P2 的 256 MiB/无 HPET 配置保留为历史阶段。多核 Windows 尚未测试。
 
 按 [WinPE 制作说明](winpe.md) 准备官方 ADK/add-on 镜像，先在普通 OVMF 基线 VM 到达用户态并冻结哈希，然后接入分区启动链。
 
@@ -143,7 +145,7 @@ Linux 侧实现限定实验分区范围的只读后端，避免依赖 `/dev/mem`
 
 ## 代码组织与结果记录
 
-拟增加 `sources.lock.json`、`patches/linux/`、`patches/kexec-tools/`、`firmware/LwPartitionPkg/`、`payloads/ap-probe/`、`observer/`、`windows/marker/`、`tests/` 与 `configs/`。P1 的当前交付集中在 `p1/`：源码锁定、覆盖层、完整配置、构建安装脚本、payload 和验收工具；P2 交付集中在 `p2/`：固件组件、资源生成器、内核覆盖层、源码锁定、构建安装与验收工具；其余目录为后续规划。
+拟增加 `sources.lock.json`、`patches/linux/`、`patches/kexec-tools/`、`firmware/LwPartitionPkg/`、`payloads/ap-probe/`、`observer/`、`windows/marker/`、`tests/` 与 `configs/`。P1 的当前交付集中在 `p1/`：源码锁定、覆盖层、完整配置、构建安装脚本、payload 和验收工具；P2 交付集中在 `p2/`：固件组件、资源生成器、内核覆盖层、源码锁定、构建安装与验收工具；P3 交付集中在 `p3/`：官方介质构建、引导适配、低端 RAM/IOAPIC/HPET/GOP、用户态遥测及双系统验收；其余目录为后续规划。
 
 单一版本化资源清单作为 loader、UEFI 生成和验收工具的共同输入，包含 CPU/APIC 映射、带类型的物理内存区间、设备和寄存器归属、串口、mailbox、固件策略。物理内存区间和映射属性必须显式校验，不依靠默认假设。
 
@@ -158,6 +160,6 @@ Linux 侧实现限定实验分区范围的只读后端，避免依赖 `/dev/mem`
 3. 第 5–7 日：目标 AP 入口、mailbox generation/心跳、失败状态和最小 payload。
 4. 第 8–10 日：冷启动重复验证、30 分钟连续性、边界错误拒绝与 P1 报告。
 
-若已有机制可以完整复用，可提前进入 P2；若源码找回或基础内核存在问题，先修订估算。P2/P3 的服务覆盖与平台行为尚未确定，待 P1 完成后给出实现依据充分的排期。完整项目按验收阶段推进，不提前承诺固定总工期。
+若已有机制可以完整复用，可提前进入 P2；若源码找回或基础内核存在问题，先修订估算。P1–P3 现已完成对应的阶段验收，后续按 P4 已知数据读取推进。完整项目按验收阶段推进，不提前承诺固定总工期。
 
 参考：Hudson 的工作证明的是特殊环境中的链式启动；其固件保留和退出 Linux 的方法不直接提供并行共存。[Linux as a UEFI bootloader and kexecing Windows](https://trmm.net/chainload/)

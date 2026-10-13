@@ -2,7 +2,9 @@
 
 目标：Linux 持续运行，在划分的 CPU、内存和设备资源上启动 Windows，并由 Linux 从外部读取和解析 Windows 数据。项目不以两系统间的安全隔离为验收目标。
 
-当前已完成 **P2：分区 UEFI 与平台描述**。独立的 `lwlab-boot` 在主 Linux 持续运行时启动 AP 上的 EDK2 UEFI，10 次冷启动均通过九项 EFI 自检及 Linux 连续性检查。尚未启动 Windows/WinPE 或实现 Windows 数据读取。
+当前已完成 **P3：WinPE 并行启动**。同一台 `lwlab-boot` 内，Linux 在 CPU 0–3 持续运行，CPU 4 启动官方 Windows 11 x64 对应 WinPE 并运行用户态测试程序。**10/10 次冷启动通过，双系统持续共存 31 分 30 秒**，Linux 网络与文件 I/O 检查正常。当前为 QEMU/KVM 内的单 AP 原型；裸机、多核 Windows 和 P4 Linux 数据读取尚未验收。
+
+实测证据见 [P3 报告](docs/2026-10-14-p3.md)，复现方法见 [P3 使用说明](p3/README.md)。
 
 2026-10-13 的服务器环境已通过 P0 验收，详见 [准备结果](docs/2026-10-13-preparation.md)。
 
@@ -80,7 +82,7 @@ sudo virsh -c qemu:///system domdisplay lwlab-dev
 
 外层 OVMF 负责首次启动 Linux。P2 的分区 UEFI 使用独立 DXE payload，不能把完整 OVMF 固件当成现成的 multikernel kexec 镜像。Linux AP trampoline 已适配项目 handoff。资源描述应覆盖 ACPI、APIC、PCI、低端 trampoline 内存和固件运行时状态。
 
-Windows 11 x64 WinPE 的制作步骤见 [docs/winpe.md](docs/winpe.md)。当前没有 WinPE 镜像，Windows 启动阶段尚未开始。
+Windows 11 x64 WinPE 的制作步骤见 [docs/winpe.md](docs/winpe.md)。已固定官方 add-on 输入、WinPE 实际版本和实验镜像哈希；不在 Git 中分发 Windows 二进制。
 
 ## 本地固件检查
 

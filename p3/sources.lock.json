@@ -1,0 +1,40 @@
+{
+  "edk2": {
+    "repository": "https://github.com/tianocore/edk2.git",
+    "tag": "edk2-stable202508",
+    "commit": "d46aa46c8361194521391aa581593e556c707c6e",
+    "submodules": {
+      "MdePkg/Library/MipiSysTLib/mipisyst": "370b5944c046bab043dd8b133727b2135af7747a",
+      "MdeModulePkg/Library/BrotliCustomDecompressLib/brotli": "f4153a09f87cbb9c826d8fc12c74642bb2d879ea"
+    },
+    "source_archive_sha256": "12774af685ab61784e64c5384b96e952daf1586629c41364d8912d4b8ccd3e04",
+    "source_archive": "edk2-source-complete.tar.gz (no .git; includes the two locked submodules)",
+    "brotli_usage": "Include-directory metadata only; Brotli code and BrotliCompress are not built or linked."
+  },
+  "linux": {
+    "repository": "https://github.com/cangex/zero-down-time-kernel-update.git",
+    "commit": "d75950ccbae6f5f651d4a9fd0701de1819c30579",
+    "archive_sha256": "cfd75b0cd4b8a131b7f8617f0d8d8843346624a56ef7b63ea63ab473da3910d6",
+    "overlay": "p3/apply.py invokes p2/apply.py (which invokes P1), then installs ABI 3 kernel and generated header"
+  },
+  "media": {
+    "catalog": "media-source.json",
+    "addon_version": "10.1.26100.9457",
+    "wim_system_version": "10.0.26100.1",
+    "architecture": "amd64",
+    "modifications": [
+      "add lwprobe.exe",
+      "replace startnet.cmd",
+      "select official bootmgfw_EX.efi"
+    ]
+  },
+  "toolchain": {
+    "system": "Ubuntu 24.04 amd64",
+    "gcc": "13.3.0-6ubuntu2~24.04.1",
+    "binutils": "2.42",
+    "mingw_gcc": "13-win32",
+    "nasm": "2.16.01",
+    "msitools": "0.103",
+    "wimlib": "1.14.4-1.1build2"
+  }
+}
