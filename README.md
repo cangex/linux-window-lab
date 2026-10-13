@@ -2,9 +2,19 @@
 
 目标：Linux 持续运行，在划分的 CPU、内存和设备资源上启动 Windows，并由 Linux 从外部读取和解析 Windows 数据。项目不以两系统间的安全隔离为验收目标。
 
-当前已完成 **P3：WinPE 并行启动**。同一台 `lwlab-boot` 内，Linux 在 CPU 0–3 持续运行，CPU 4 启动官方 Windows 11 x64 对应 WinPE 并运行用户态测试程序。**10/10 次冷启动通过，双系统持续共存 31 分 30 秒**，Linux 网络与文件 I/O 检查正常。当前为 QEMU/KVM 内的单 AP 原型；裸机、多核 Windows 和 P4 Linux 数据读取尚未验收。
+当前已完成 **P4：已知数据外部读取** 和 **P5：完整 Windows 与语义解析**。
+同一台 `lwlab-boot` 内，Linux 使用 CPU 0–3，完整 Windows 11 x64
+（26100.1742）使用 CPU 4 和独占 NVMe；Linux 从自身只读内核后端发现并
+解析 Windows 的页表、进程及模块，辅助页关闭后仍能独立定位选定对象。
 
-实测证据见 [P3 报告](docs/2026-10-14-p3.md)，复现方法见 [P3 使用说明](p3/README.md)。
+P4 两次冷启动累计约 **1.10 亿次读取尝试、1203 万次通过校验**；P5 的
+两次完整 Windows 冷启动、在线真值与独立观察结果见
+[P5 报告](docs/2026-10-14-p5.md)。当前是 QEMU/KVM 内的固定平台、单
+Windows CPU 原型；长稳、Windows 独立重启、多核及裸机尚未验收。
+
+复现说明：[P4](p4/README.md)、[P5](p5/README.md)；
+[P4 验收数据](docs/2026-10-14-p4.md)。此前 P3 的 10 次 WinPE 冷启动与
+31 分 30 秒共存结果见 [P3 报告](docs/2026-10-14-p3.md)。
 
 2026-10-13 的服务器环境已通过 P0 验收，详见 [准备结果](docs/2026-10-13-preparation.md)。
 
@@ -22,7 +32,7 @@ P1 实测结果见 [验收报告](docs/2026-10-13-p1.md)，构建和复现命令
 | 固件 | OVMF 4 MiB，独立 NVRAM，Secure Boot 关闭 |
 | CPU / 内存 | 8 vCPU，16 GiB，两个虚拟 NUMA 节点，各 4 vCPU / 8 GiB |
 | 系统 | Ubuntu 24.04 cloud image，UEFI 启动 |
-| 存储 | 80 GiB Linux qcow2 overlay；64 GiB Windows 空白盘预留，暂不挂接 |
+| 存储 | 开发 VM：80 GiB Linux overlay；P5 目标 VM 另有独占 64 GiB Windows NVMe |
 | 网络 | `lwlab-net` NAT，`192.168.231.0/24`，VM `192.168.231.10` |
 | 控制台 | 两个串口；VNC 仅监听宿主机回环地址 |
 | 数据目录 | 宿主机 `/data/linux-window-lab` |
@@ -78,7 +88,9 @@ sudo virsh -c qemu:///system domdisplay lwlab-dev
 | P1 AP 独立 payload | 在 VM 内离线指定 CPU，运行测试 payload；Linux 心跳和 I/O 持续正常 |
 | P2 分区 UEFI | 独立 EFI 应用验证资源描述、内存分配和服务退出；Linux 保持运行 |
 | P3 WinPE | `bootmgfw.efi → winload.efi → WinPE` 在分区内启动；Linux 连续性同时通过 |
-| P4 数据观察 | 对带序号和校验值的测试数据进行 Linux 外部读取和一致性验证 |
+| P4 数据观察 | 已完成：带序号和校验值的数据外部读取及故障拒绝 |
+| P5 完整 Windows | 已完成：独占 NVMe 引导、外部页表/进程/模块解析及独立发现 |
+| P6 生命周期与基线 | 待做：长稳、分区恢复和优化 KVM 对照 |
 
 外层 OVMF 负责首次启动 Linux。P2 的分区 UEFI 使用独立 DXE payload，不能把完整 OVMF 固件当成现成的 multikernel kexec 镜像。Linux AP trampoline 已适配项目 handoff。资源描述应覆盖 ACPI、APIC、PCI、低端 trampoline 内存和固件运行时状态。
 

@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "kernel_sha256": "1cc3b103b25333ee2b79363bb898832a93576befd2e3a29817bd34cf7a3a102b",
+  "pdb_sha256": "dd6b14c31fbd976a21a35ce59186f38406c23884e9b7d5e8623d0cd4f8e9f11a",
+  "pdb_url": "https://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/B6CDAA3A3EF13C3B2799115B0470342B1/ntkrnlmp.pdb",
+  "pe": {
+    "timestamp": 2670613943,
+    "size": 21291008,
+    "checksum": 12593189,
+    "sections": [
+      {
+        "va": 4096,
+        "vsize": 853360,
+        "rawsize": 856064,
+        "rawptr": 4096
+      },
+      {
+        "va": 860160,
+        "vsize": 436392,
+        "rawsize": 438272,
+        "rawptr": 860160
+      },
+      {
+        "va": 1298432,
+        "vsize": 9764,
+        "rawsize": 12288,
+        "rawptr": 1298432
+      },
+      {
+        "va": 1310720,
+        "vsize": 111405,
+        "rawsize": 114688,
+        "rawptr": 1310720
+      },
+      {
+        "va": 1425408,
+        "vsize": 1,
+        "rawsize": 4096,
+        "rawptr": 1425408
+      },
+      {
+        "va": 1429504,
+        "vsize": 43192,
+        "rawsize": 45056,
+        "rawptr": 1429504
+      },
+      {
+        "va": 1474560,
+        "vsize": 622592,
+        "rawsize": 0,
+        "rawptr": 0
+      },
+      {
+        "va": 2097152,
+        "vsize": 4873881,
+        "rawsize": 4874240,
+        "rawptr": 1474560
+      },
+      {
+        "va": 6971392,
+        "vsize": 4456496,
+        "rawsize": 4460544,
+        "rawptr": 6348800
+      },
+      {
+        "va": 11431936,
+        "vsize": 150588,
+        "rawsize": 151552,
+        "rawptr": 10809344
+      },
+      {
+        "va": 11583488,
+        "vsize": 9518,
+        "rawsize": 12288,
+        "rawptr": 10960896
+      },
+      {
+        "va": 11595776,
+        "vsize": 22948,
+        "rawsize": 24576,
+        "rawptr": 10973184
+      },
+      {
+        "va": 11620352,
+        "vsize": 202001,
+        "rawsize": 204800,
+        "rawptr": 10997760
+      },
+      {
+        "va": 11825152,
+        "vsize": 9078,
+        "rawsize": 12288,
+        "rawptr": 11202560
+      },
+      {
+        "va": 11837440,
+        "vsize": 26996,
+        "rawsize": 28672,
+        "rawptr": 11214848
+      },
+      {
+        "va": 11866112,
+        "vsize": 6563,
+        "rawsize": 8192,
+        "rawptr": 11243520
+      },
+      {
+        "va": 11874304,
+        "vsize": 3827,
+        "rawsize": 4096,
+        "rawptr": 11251712
+      },
+      {
+        "va": 11878400,
+        "vsize": 9342,
+        "rawsize": 12288,
+        "rawptr": 11255808
+      },
+      {
+        "va": 11890688,
+        "vsize": 2144,
+        "rawsize": 4096,
+        "rawptr": 11268096
+      },
+      {
+        "va": 11894784,
+        "vsize": 183,
+        "rawsize": 4096,
+        "rawptr": 11272192
+      },
+      {
+        "va": 11898880,
+        "vsize": 4096,
+        "rawsize": 4096,
+        "rawptr": 11276288
+      },
+      {
+        "va": 11902976,
+        "vsize": 127398,
+        "rawsize": 131072,
+        "rawptr": 11280384
+      },
+      {
+        "va": 12034048,
+        "vsize": 9916,
+        "rawsize": 12288,
+        "rawptr": 11411456
+      },
+      {
+        "va": 12046336,
+        "vsize": 643756,
+        "rawsize": 647168,
+        "rawptr": 11423744
+      },
+      {
+        "va": 12693504,
+        "vsize": 1986560,
+        "rawsize": 0,
+        "rawptr": 0
+      },
+      {
+        "va": 14680064,
+        "vsize": 1844056,
+        "rawsize": 61440,
+        "rawptr": 12070912
+      },
+      {
+        "va": 16527360,
+        "vsize": 40000,
+        "rawsize": 8192,
+        "rawptr": 12132352
+      },
+      {
+        "va": 16568320,
+        "vsize": 36288,
+        "rawsize": 4096,
+        "rawptr": 12140544
+      },
+      {
+        "va": 16605184,
+        "vsize": 114016,
+        "rawsize": 12288,
+        "rawptr": 12144640
+      },
+      {
+        "va": 16719872,
+        "vsize": 80976,
+        "rawsize": 40960,
+        "rawptr": 12156928
+      },
+      {
+        "va": 16801792,
+        "vsize": 135860,
+        "rawsize": 4096,
+        "rawptr": 12197888
+      },
+      {
+        "va": 16941056,
+        "vsize": 1933312,
+        "rawsize": 0,
+        "rawptr": 0
+      },
+      {
+        "va": 18874368,
+        "vsize": 8272,
+        "rawsize": 12288,
+        "rawptr": 12201984
+      },
+      {
+        "va": 18886656,
+        "vsize": 2084864,
+        "rawsize": 0,
+        "rawptr": 0
+      },
+      {
+        "va": 20971520,
+        "vsize": 231496,
+        "rawsize": 233472,
+        "rawptr": 12214272
+      },
+      {
+        "va": 21204992,
+        "vsize": 85540,
+        "rawsize": 86016,
+        "rawptr": 12447744
+      }
+    ],
+    "pdb": {
+      "guid": "b6cdaa3a-3ef1-3c3b-2799-115b0470342b",
+      "age": 1,
+      "name": "ntkrnlmp.pdb",
+      "key": "B6CDAA3A3EF13C3B2799115B0470342B1",
+      "rsds_rva": 356200,
+      "info_age": 6,
+      "dbi_age": 1
+    }
+  },
+  "types": {
+    "_EPROCESS": {
+      "type_index": "0x1C4E",
+      "size": 2112,
+      "fields": {
+        "Pcb": 0,
+        "UniqueProcessId": 464,
+        "ActiveProcessLinks": 472,
+        "ImageFileName": 824,
+        "CreateTime": 504,
+        "Peb": 736
+      }
+    },
+    "_KPROCESS": {
+      "type_index": "0x1B24",
+      "size": 456,
+      "fields": {
+        "DirectoryTableBase": 40
+      }
+    },
+    "_PEB": {
+      "type_index": "0x31FD",
+      "size": 2000,
+      "fields": {
+        "Ldr": 24
+      }
+    },
+    "_PEB_LDR_DATA": {
+      "type_index": "0x3261",
+      "size": 88,
+      "fields": {
+        "InLoadOrderModuleList": 16
+      }
+    },
+    "_LDR_DATA_TABLE_ENTRY": {
+      "type_index": "0x38C3",
+      "size": 312,
+      "fields": {
+        "InLoadOrderLinks": 0,
+        "DllBase": 48,
+        "SizeOfImage": 64,
+        "BaseDllName": 88
+      }
+    },
+    "_KLDR_DATA_TABLE_ENTRY": {
+      "type_index": "0x336E",
+      "size": 160,
+      "fields": {
+        "InLoadOrderLinks": 0,
+        "DllBase": 48,
+        "SizeOfImage": 64,
+        "BaseDllName": 88
+      }
+    }
+  },
+  "symbols": {
+    "PsActiveProcessHead": 15747808,
+    "NtBuildNumber": 14722220,
+    "PsLoadedModuleList": 15680544,
+    "PsInitialSystemProcess": 16534184
+  },
+  "tool": "Ubuntu LLVM version 18.1.3\n  Optimized build."
+}

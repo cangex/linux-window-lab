@@ -1,0 +1,205 @@
+{
+  "date": "2026-10-14",
+  "scope": "QEMU/KVM same-machine Linux and full Windows; one Windows CPU",
+  "passed": true,
+  "unit_tests": {
+    "paging_and_verification": 15,
+    "p4_protocol": 8
+  },
+  "attempts": [
+    {
+      "passed": true,
+      "scope": "same-VM Linux and full Windows, one Windows CPU",
+      "generation": 502096234837939548,
+      "boot_id": "103f0866-ada2-4700-900a-7595f958acda",
+      "linux_seconds": 404.56,
+      "ping_failures": 0,
+      "generation_guard": {
+        "previous": 326134240642255228,
+        "current": 502096234837939548,
+        "errno": "ESTALE"
+      },
+      "matched_samples": 34,
+      "comparison_candidates": 34,
+      "temporally_unmatched_samples": 0,
+      "independent_samples": 61,
+      "child_identities": [
+        [
+          2856,
+          134363888261979532,
+          18446673219564527808
+        ],
+        [
+          4772,
+          134363887959262335,
+          18446673219578409152
+        ]
+      ],
+      "process_absence_observed": true,
+      "module_load_observed": true,
+      "module_unload_observed": true,
+      "full_desktop_process_observed": true,
+      "independent_bootstrap": {
+        "event": "bootstrap",
+        "kernel": 18446735297377992704,
+        "system": 18446673219523678272,
+        "cr3": 1761280,
+        "generation": 502096234837939548,
+        "build": 26100,
+        "pdb": "953A8DE880B0818C32DA2DEC1D79C2D91",
+        "seconds": 7.664894556999997,
+        "address_helper_used": false
+      },
+      "metadata": {
+        "firmware_sha256": "9a80aca3a24aaa8c9257b1ecc8c0911170713fcc3517d29efd42a482fff5cc19",
+        "kernel": "6.18.0-rc3-lwlab-p5",
+        "kernel_sha256": "8aef59a988af01f3996172d98916c307bd2a4f33eb90597bacc740e7c46aa9da",
+        "config_sha256": "c205fb9772c67f4d93aa9a4df57b2d551513a40ddc91d983ce20a960226cdfc0",
+        "boot_id": "103f0866-ada2-4700-900a-7595f958acda",
+        "windows_observer_exit": 0,
+        "cmdline": "BOOT_IMAGE=/vmlinuz-6.18.0-rc3-lwlab-p5 root=UUID=1bfefdfb-34c9-46c7-854f-399d0a1dea04 ro console=tty0 console=ttyS0,115200n8 nokaslr no5lvl zdu_pool=1536M@0x10000000 memmap=6G$10G pci-stub.ids=1b36:0010 memmap=15M$1M memmap=128K$0x50000 noapic hpet=disable 8250.nr_uarts=1 no_ipi_broadcast=1",
+        "guest_exit": 0,
+        "observer_exit": 0
+      },
+      "name": "full03",
+      "offline": {
+        "passed": true,
+        "nonce": "01dd5b3e3c8ef51d",
+        "independent_candidates": 61,
+        "stable_matched": 23,
+        "transition_or_time_excluded": 38,
+        "stable_mismatches": [],
+        "truth_records": 516,
+        "last_truth_seconds": 535,
+        "io_count": 516,
+        "io_errors": 0,
+        "helper_absent_for_matched_samples": true,
+        "child_pids": [
+          2856,
+          4772
+        ],
+        "module_loaded_and_unloaded": true,
+        "process_absence_observed": true,
+        "consistency": "stable truth across sample time +/- 2 seconds, log gaps <= 2 seconds; not atomic snapshots"
+      },
+      "max_tcp_gap_seconds": 1.0244220499880612,
+      "observation_stats": {
+        "comparison": {
+          "event": "result",
+          "valid_samples": 34,
+          "unavailable": 7,
+          "generation": 502096234837939548,
+          "physical_calls": 626619,
+          "physical_bytes": 68904155692,
+          "address_helper_used": false
+        },
+        "independent": {
+          "event": "result",
+          "valid_samples": 61,
+          "unavailable": 0,
+          "generation": 502096234837939548,
+          "physical_calls": 1016477,
+          "physical_bytes": 10160199973,
+          "address_helper_used": false
+        }
+      }
+    },
+    {
+      "passed": true,
+      "scope": "same-VM Linux and full Windows, one Windows CPU",
+      "generation": 1107831956156717307,
+      "boot_id": "3a059487-5208-4463-9e23-02e777fcb431",
+      "linux_seconds": 403.745,
+      "ping_failures": 0,
+      "generation_guard": {
+        "previous": 502096234837939548,
+        "current": 1107831956156717307,
+        "errno": "ESTALE"
+      },
+      "matched_samples": 24,
+      "comparison_candidates": 24,
+      "temporally_unmatched_samples": 0,
+      "independent_samples": 61,
+      "child_identities": [
+        [
+          1328,
+          134363894622695859,
+          18446642382322704512
+        ],
+        [
+          2216,
+          134363894318438521,
+          18446642382324965824
+        ]
+      ],
+      "process_absence_observed": true,
+      "module_load_observed": true,
+      "module_unload_observed": true,
+      "full_desktop_process_observed": true,
+      "independent_bootstrap": {
+        "event": "bootstrap",
+        "kernel": 18446735280814686208,
+        "system": 18446642382279229504,
+        "cr3": 1761280,
+        "generation": 1107831956156717307,
+        "build": 26100,
+        "pdb": "953A8DE880B0818C32DA2DEC1D79C2D91",
+        "seconds": 7.216761686999973,
+        "address_helper_used": false
+      },
+      "metadata": {
+        "firmware_sha256": "9a80aca3a24aaa8c9257b1ecc8c0911170713fcc3517d29efd42a482fff5cc19",
+        "kernel": "6.18.0-rc3-lwlab-p5",
+        "kernel_sha256": "8aef59a988af01f3996172d98916c307bd2a4f33eb90597bacc740e7c46aa9da",
+        "config_sha256": "c205fb9772c67f4d93aa9a4df57b2d551513a40ddc91d983ce20a960226cdfc0",
+        "boot_id": "3a059487-5208-4463-9e23-02e777fcb431",
+        "windows_observer_exit": 0,
+        "cmdline": "BOOT_IMAGE=/vmlinuz-6.18.0-rc3-lwlab-p5 root=UUID=1bfefdfb-34c9-46c7-854f-399d0a1dea04 ro console=tty0 console=ttyS0,115200n8 nokaslr no5lvl zdu_pool=1536M@0x10000000 memmap=6G$10G pci-stub.ids=1b36:0010 memmap=15M$1M memmap=128K$0x50000 noapic hpet=disable 8250.nr_uarts=1 no_ipi_broadcast=1",
+        "guest_exit": 0,
+        "observer_exit": 0
+      },
+      "name": "full04",
+      "offline": {
+        "passed": true,
+        "nonce": "01dd5b3fb7eddbcf",
+        "independent_candidates": 61,
+        "stable_matched": 20,
+        "transition_or_time_excluded": 41,
+        "stable_mismatches": [],
+        "truth_records": 343,
+        "last_truth_seconds": 366,
+        "io_count": 343,
+        "io_errors": 0,
+        "helper_absent_for_matched_samples": true,
+        "child_pids": [
+          1328,
+          2216
+        ],
+        "module_loaded_and_unloaded": true,
+        "process_absence_observed": true,
+        "consistency": "stable truth across sample time +/- 2 seconds, log gaps <= 2 seconds; not atomic snapshots"
+      },
+      "max_tcp_gap_seconds": 1.040647832211107,
+      "observation_stats": {
+        "comparison": {
+          "event": "result",
+          "valid_samples": 24,
+          "unavailable": 8,
+          "generation": 1107831956156717307,
+          "physical_calls": 469486,
+          "physical_bytes": 76411642116,
+          "address_helper_used": false
+        },
+        "independent": {
+          "event": "result",
+          "valid_samples": 61,
+          "unavailable": 0,
+          "generation": 1107831956156717307,
+          "physical_calls": 1014600,
+          "physical_bytes": 9988219184,
+          "address_helper_used": false
+        }
+      }
+    }
+  ]
+}

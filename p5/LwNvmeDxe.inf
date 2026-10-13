@@ -1,0 +1,25 @@
+[Defines]
+ INF_VERSION = 0x00010005
+ BASE_NAME = LwNvmeDxe
+ FILE_GUID = D62479F3-C7F5-4282-BC94-74F29C551CB1
+ MODULE_TYPE = DXE_DRIVER
+ VERSION_STRING = 0.1
+ ENTRY_POINT = LwNvmeEntry
+[Sources]
+ LwNvmeDxe.c
+[Packages]
+ MdePkg/MdePkg.dec
+ LwPartitionPkg/LwPartitionPkg.dec
+[LibraryClasses]
+ UefiDriverEntryPoint
+ UefiBootServicesTableLib
+ IoLib
+ BaseMemoryLib
+ BaseLib
+ DebugLib
+ MemoryAllocationLib
+[Protocols]
+ gEfiPciIoProtocolGuid
+ gEfiDevicePathProtocolGuid
+[Depex]
+ TRUE

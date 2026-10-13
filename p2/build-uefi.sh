@@ -11,6 +11,8 @@ export WORKSPACE="$SOURCE"
 set +u
 source edksetup.sh
 set -u
+# Overlay copies preserve mtimes; variant switches must not reuse newer objects.
+build -a X64 -t GCC5 -b DEBUG -p LwPartitionPkg/LwPartitionPkg.dsc cleanall
 build -a X64 -t GCC5 -b DEBUG -p LwPartitionPkg/LwPartitionPkg.dsc -n 8
 python3 "$P2_DIR/pack.py" "$SOURCE/Build/LwPartition/DEBUG_GCC5" "$OUTPUT"
 python3 "$P2_DIR/verify-layout.py" "$OUTPUT"

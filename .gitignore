@@ -4,6 +4,8 @@ images/
 keys/
 state/
 state-p1/
+state-p5/
+state-p5-install/
 artifacts/
 baselines/
 config/
@@ -12,4 +14,6 @@ local-connection.md
 *.iso
 *.fd
 *.img
+*.raw
+unattend.xml
 *.pem

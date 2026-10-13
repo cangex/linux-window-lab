@@ -1,0 +1,48 @@
+{
+  "edk2": {
+    "repository": "https://github.com/tianocore/edk2.git",
+    "tag": "edk2-stable202508",
+    "commit": "d46aa46c8361194521391aa581593e556c707c6e",
+    "submodules": {
+      "MdePkg/Library/MipiSysTLib/mipisyst": "370b5944c046bab043dd8b133727b2135af7747a",
+      "MdeModulePkg/Library/BrotliCustomDecompressLib/brotli": "f4153a09f87cbb9c826d8fc12c74642bb2d879ea"
+    },
+    "source_archive_sha256": "12774af685ab61784e64c5384b96e952daf1586629c41364d8912d4b8ccd3e04",
+    "source_archive": "edk2-source-complete.tar.gz (no .git; includes the two locked submodules)",
+    "brotli_usage": "Include-directory metadata only; Brotli code and BrotliCompress are not built or linked."
+  },
+  "linux": {
+    "repository": "https://github.com/cangex/zero-down-time-kernel-update.git",
+    "commit": "d75950ccbae6f5f651d4a9fd0701de1819c30579",
+    "archive_sha256": "cfd75b0cd4b8a131b7f8617f0d8d8843346624a56ef7b63ea63ab473da3910d6",
+    "overlay": "p5/apply.py -> p4/apply.py -> p3/apply.py -> P2/P1; p5/stage.py generated platform"
+  },
+  "media": {
+    "source_page": "https://www.microsoft.com/en-us/evalcenter/download-windows-11-enterprise",
+    "iso_build": "26100.1742",
+    "edition": "Windows 11 Enterprise LTSC 2024 Evaluation x64 en-US",
+    "iso_sha256": "67cec5865eaa037a72ddc633a717a10a2bed50778862267223ddb9c60ef5da68",
+    "iso_bytes": 5112850432,
+    "hash_provenance": "locally measured on official HTTPS download, then pinned for reproduction",
+    "winpe_installer": "P3 frozen official ADK/add-on 10.0.26100.1 plus project deployment/test programs",
+    "profile": "profiles/windows-26100.1742.json"
+  },
+  "toolchain": {
+    "system": "Ubuntu 24.04 amd64",
+    "gcc": "13.3.0-6ubuntu2~24.04.1",
+    "binutils": "2.42",
+    "mingw_gcc": "13-win32",
+    "nasm": "2.16.01",
+    "msitools": "0.103",
+    "wimlib": "1.14.4-1.1build2"
+  },
+  "tested_artifacts": {
+    "linux_release": "6.18.0-rc3-lwlab-p5",
+    "kernel_sha256": "8aef59a988af01f3996172d98916c307bd2a4f33eb90597bacc740e7c46aa9da",
+    "config_sha256": "c205fb9772c67f4d93aa9a4df57b2d551513a40ddc91d983ce20a960226cdfc0",
+    "firmware_sha256": "9a80aca3a24aaa8c9257b1ecc8c0911170713fcc3517d29efd42a482fff5cc19",
+    "modules_archive_sha256": "6c19b2e10e8b87eb2cd86d8179fba36fde12bea3594d3908b88b5bf87689b451",
+    "package_server_path": "/data/linux-window-lab/artifacts/p5/p5-package-final",
+    "firmware_build_directory": "/opt/lwlab/build/p5-firmware-crs"
+  }
+}
