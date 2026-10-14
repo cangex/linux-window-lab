@@ -10,10 +10,20 @@
 - `prepare` 要求 generation 严格大于上一代。建议 `max(time.time_ns(), previous+1)`，禁止重用旧代号使旧 fd 复活。停止、清空和读取共用内核锁。
 - `cpu-profile.py`、`cpu-probe.py`：从固定 PDB 生成 PRCB 偏移，独立发现内核并读取逐 CPU 标识、执行时间。
 - `workload.c`：固定亲和性线程验证内存、NVMe 写入/flush/读回，创建子进程、装卸 DLL；仅在 Windows 独占盘写真值，不创建共享地址辅助页。
-- `observe.py`、`clock.c`：有界 JSONL 采样，记录对象身份、读取范围、TSC 和 Linux 单调时钟。**尚未验证跨 CPU TSC 对齐；日志存在不等于真值核对通过。独立离线验证器及延迟统计尚待完成。**
+- `observe.py`、`clock.c`：有界 JSONL 采样，记录对象身份、读取范围、TSC 和 Linux 单调时钟。新增 `--windows-clock` 选项，使用 PDB 中的共享系统时间结构为语义读取加时间区间；须先重新生成 profile。运行时验证尚未完成。
 - `recover.py`：一次分区停止/重建冒烟工具，检查同一 Linux boot ID、停止期间拒绝 open、旧 fd 拒绝、代号重用拒绝和新代独立发现。不能单独替代故障矩阵/逐 CPU 负载/网络连续性验收。
 - `setup.ps1`、`console.py`：仅用于普通激活 VM，安装须提升权限。关闭休眠后完整关机，避免离线修改处于休眠状态的 NTFS。QMP 仅用于安装界面，不能充当外部内存读取验收路径。
 - `resource-gate.py`：宿主机只读资源采样；只写实验历史文件，不启动或关闭 VM。
+
+## 10 月 15 日续作工具（尚待 VM 验证）
+
+- `windows_clock.py` 从目标页表映射的共享用户页读取 Windows 系统时间，以高低字重读排除撕裂；偏移只从已验证 PDB 生成，不使用猜测偏移。
+- `verify-semantics.py` 离线读取独占盘真值，用 Windows 时钟区间筛选稳定样本，核对 generation、进程身份、子进程、DLL 和内核模块；所有请求均进入覆盖率分母，变化窗口和不可用分别计数。默认 50 ms 余量仍须实际校准，运行测试完成前不算 P6 验收。
+- `verify-workload.py` 检查指定 workload 实例的逐 CPU/I/O 进展、错误、时长和生命周期计数；它不验证外部语义。
+- `guest-probe.py` 和 `run-attempt.py` 采集 Linux 持续 TCP、fsync/readback、I/O 用时与可选外部观察。后者只接受已经启动且 idle 的 r5 Linux，以及 `state-p6/windows.qcow2` 专用克隆；默认采集结束请求关闭外层 VM，仍须单独做冷盘校验。`--keep-running` 仅供后续恢复试验。
+- 本地合计 16 项 P6 测试通过；新路径还没有实机数据。PDB 时钟类型需在 dev 资源准入后重新生成。
+
+共享页与时间字段依据微软的 [!kuser 文档](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-kuser)、[KUSER_SHARED_DATA 定义](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data) 和 [系统时间说明](https://learn.microsoft.com/en-us/windows/win32/sysinfo/system-time)。TSC 保留为诊断数据，验收器使用 Windows 系统时间区间，并核查其推进与 Linux 单调时钟一致。
 
 ## 资源准入（试跑规则 v1）
 

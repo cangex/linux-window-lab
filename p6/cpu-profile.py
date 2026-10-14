@@ -14,6 +14,15 @@ for idx,record in records.items():
  if all(k in offsets for k in wanted):matches.append(dict(type_index=idx,size=int(re.search(r'sizeof (\d+)',record)[1]),fields={k:offsets[k] for k in wanted}))
 assert len(matches)==1
 profile['types']['_KPRCB']=matches[0]
+for name,fields in [('_KUSER_SHARED_DATA',('SystemTime','NtBuildNumber')),('_KSYSTEM_TIME',('LowPart','High1Time','High2Time'))]:
+ matches=[]
+ for idx,record in records.items():
+  if not (record.startswith('LF_STRUCTURE ') and '`'+name+'`' in record and 'forward ref' not in record):continue
+  fieldlist=re.search(r'field list: (0x[0-9A-F]+)',record)[1]
+  offsets={m[1]:int(m[2]) for m in re.finditer(r'LF_MEMBER \[name = `([^`]+)`.*?offset = (\d+),',records[fieldlist])}
+  if all(k in offsets for k in fields):matches.append(dict(type_index=idx,size=int(re.search(r'sizeof (\d+)',record)[1]),fields={k:offsets[k] for k in fields}))
+ assert len(matches)==1,(name,len(matches))
+ profile['types'][name]=matches[0]
 for name in ('KeNumberProcessors','KiProcessorBlock'):
  m=re.findall(r'S_PUB32[^\n]*`'+name+r'`\n\s*flags = [^\n]*addr = (\d+):(\d+)',(r/'publics.txt').read_text())
  assert len(m)==1
