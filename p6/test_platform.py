@@ -1,5 +1,5 @@
 """Validate generated ACPI/HOB bytes independently of the firmware build."""
-import importlib.util,json,struct,subprocess,sys,tempfile,unittest
+import hashlib,importlib.util,json,struct,subprocess,sys,tempfile,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
 class Platform(unittest.TestCase):
@@ -41,4 +41,36 @@ class Platform(unittest.TestCase):
   with tempfile.TemporaryDirectory() as temp:
    result=subprocess.run([sys.executable,str(ROOT/'stage.py'),str(Path(temp)/'stage'),'--cpus','8','--disk','unused'],capture_output=True)
    self.assertNotEqual(result.returncode,0)
+ def test_packed_layout_parking_bounds(self):
+  with tempfile.TemporaryDirectory() as temp:
+   root=Path(temp);directory=root/'stage';disk=root/'placeholder.img';disk.touch()
+   subprocess.run([sys.executable,str(ROOT/'stage.py'),str(directory),'--cpus','4','--disk',str(disk)],check=True,capture_output=True)
+   spec=importlib.util.spec_from_file_location('pack',directory/'pack.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+   # Compact fixture exercises the generated verifier, including real packed
+   # HOB/ACPI bytes and hashes, without requiring an EDK2 build or Windows disk.
+   m.p.update(memory_size=0xa0000,core_offset=0x20000,fv_offset=0x30000,
+    hob_offset=0x40000,acpi_offset=0x50000,stack_offset=0x70000,stack_size=0x10000,free_offset=0x90000)
+   m.end=m.b+m.p['memory_size']
+   tables,addresses=m.acpi(m.acpi_table(b'DSDT',b'',2))
+   original=m.hobs(4096,m.A('core'),4096);park=None;pos=0
+   while pos<len(original):
+    typ,length=struct.unpack_from('<HH',original,pos)
+    if typ==2 and struct.unpack_from('<Q',original,pos+24)[0]==0x6f000:park=pos
+    pos+=length
+   self.assertIsNotNone(park)
+   def verify(hobs):
+    entry=m.A('entry');raw=bytearray(m.A('acpi')+len(tables)-entry);assets=[]
+    for address,data in [(m.A('hob'),hobs),(m.A('acpi'),tables)]:
+     raw[address-entry:address-entry+len(data)]=data
+     assets.append(dict(address=hex(address),size=len(data),sha256=hashlib.sha256(data).hexdigest()))
+    (root/'partition.bin').write_bytes(raw)
+    (root/'layout.json').write_text(json.dumps(dict(manifest=m.p,assets=assets,acpi=addresses,payload_sha256=hashlib.sha256(raw).hexdigest())))
+    return subprocess.run([sys.executable,str(directory/'verify-layout.py'),str(root)],capture_output=True)
+   result=verify(original);self.assertEqual(result.returncode,0,result.stderr.decode())
+   for offset,fmt,value in [(24,'<Q',0x6e000),(32,'<Q',8192),(40,'<I',7)]:
+    with self.subTest(offset=offset):
+     broken=bytearray(original);struct.pack_into(fmt,broken,park+offset,value)
+     self.assertNotEqual(verify(broken).returncode,0)
+   missing=bytearray(original);struct.pack_into('<H',missing,park,4)
+   self.assertNotEqual(verify(missing).returncode,0)
 if __name__=='__main__':unittest.main()

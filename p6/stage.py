@@ -14,6 +14,20 @@ manifest=a.output/'partition.json';c=json.loads(manifest.read_text())
 c.update(windows_cpus=cpus,windows_apic_ids=cpus,p6_cpu_count=a.cpus)
 manifest.write_text(json.dumps(c,indent=2)+'\n')
 edit('pack.py','    allocation(b,0x10000,6)','    allocation(0x6f000,0x1000,0)\n    allocation(b,0x10000,6)')
+edit('verify-layout.py','allocations=[];types=[];resources=[]',
+ 'allocations=[];types=[];resources=[];parking=0')
+edit('verify-layout.py',
+ '  assert base<=start and start+size<=end\n  for lo,hi in allocations:assert start+size<=lo or start>=hi\n  allocations.append((start,start+size))',
+ '''  if start==0x6f000:
+   assert size==4096 and kind==0
+   assert c['real_memory_base']<=start and start+size<=c['real_memory_base']+c['real_memory_size']
+   parking+=1
+  else:
+   assert base<=start and start+size<=end
+   for lo,hi in allocations:assert start+size<=lo or start>=hi
+   allocations.append((start,start+size))''')
+edit('verify-layout.py','assert sorted(allocations)[0][0]==base',
+ 'assert parking==1\nassert sorted(allocations)[0][0]==base')
 edit('verify-image.py','assert fb_reserved',
  "assert fb_reserved\n# Parking page must remain outside all Windows allocations.\nhob=base+number('hob_offset'); park=False\nfor _ in range(100):\n    kind,length=struct.unpack('<HH',read(hob,4))\n    if kind==2:\n        lo,size,typ=struct.unpack_from('<QQI',read(hob,length),24)\n        if lo==0x6f000 and size==4096 and typ==0:park=True\n    if kind==0xffff:break\n    hob+=length\nassert park")
 edit('pack.py',"struct.pack('<BBBBI',0,8,p['apic_id'],p['apic_id'],1)",

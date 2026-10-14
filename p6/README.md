@@ -29,7 +29,7 @@
 
 缺失、过期、压力事件会阻止准入；不能用整机空闲掩盖单节点耗尽。
 当前门限用于恢复试跑，正式长稳前还需冻结资源分配/矩阵/停止规则。
-持续压力下暂停新增负载；构建 VM 当前为 8 GiB、内存跨 0–7 节点交错、构建并发 2。
+持续压力下暂停新增负载；构建 VM 配置为 8 GiB、内存跨 0–7 节点交错、构建并发 2；构建已结束，VM 已关机。
 
 ```sh
 python3 p6/resource-gate.py --history artifacts/p6/resource-history.jsonl
@@ -58,11 +58,12 @@ cc -shared -fPIC -O2 -Wall -Wextra -Werror p6/clock.c -o p6/clock.so
 **不要将旧四核冒烟固件用于恢复测试**：该固件没有停驻页预留。
 服务器最终部署候选必须为 `p6-package-r5` 加 `p6-firmware-r4`（后者已预留停驻页），并核验 SHA256SUMS。
 初始 r4 内核缺少最后的 generation 单调约束与 ICR 中断保护，只作构建中间产物。
-最终候选尚待编译完成和实际 VM 验证。
+最终候选已编译并校验，复制在宿主 `artifacts/p6/p6-package-r5/`；尚待实际 VM 验证。
+修复后的 `p6-stage-r5/verify-layout.py` 已核验完整固件，仍保留 `p6-firmware-r4` 目录名，因为固件字节未修改。
 
 ## 等待恢复后的执行次序
 
-1. 确认资源连续通过；读取构建日志，检查 r5 包和磁盘余量；禁止只因进程消失就认定成功。
+1. 确认资源连续通过；读取构建日志，从宿主 `artifacts/p6/p6-package-r5/` 检查 r5 包和磁盘余量；dev 已关闭，不必启动它读取日志。
 2. 仅启动 `lwlab-p6-activation`。使用管理员 PowerShell 运行 setup，验证新负载、关闭休眠、完整关机。确认 NTFS 可安全离线读取，保存许可和真值。不得强制清除休眠状态写盘。
 3. 从关闭的激活副本创建独立 P6 克隆，保留 P5 基线不变。安装 P6 包，记录新的内核/固件/磁盘/profile 哈希。
 4. 先 4 CPU 短试跑并核对每 CPU 负载，再完成离线真值时序验证；基础稳定后试单次 `recover.py`。它需要正在运行的 Windows 分区，停止失败即保留现场。
