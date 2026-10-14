@@ -20,4 +20,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Task setup failed' }
 schtasks.exe /Run /TN LWLAB-P5
 Start-Sleep -Seconds 15
 Get-Content "$root\p6-truth.jsonl" -Tail 1 | Set-Content "$root\p6-setup-result.json"
+$result = Get-Content "$root\p6-setup-result.json" | ConvertFrom-Json
+$running = Get-Process lwtruth
+if ($result.schema -ne 1 -or $result.helper -ne $false -or $result.pid -ne $running.Id -or $result.errors -ne 0) { throw 'Workload startup validation failed' }
+if (@($result.cpus | Where-Object { $_.loops -le 0 -or $_.errors -ne 0 }).Count -gt 0) { throw 'CPU worker validation failed' }
 shutdown.exe /s /t 5

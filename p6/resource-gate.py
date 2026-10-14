@@ -13,7 +13,12 @@ def assess(sample):
 
 def stable(history,now,seconds=600):
  recent=[x for x in history if 0<=now-x['time']<=seconds+90]
- if not recent or now-recent[0]['time']<seconds:return False
+ # Include the closest sample at/before the window boundary, not every older
+ # sample in the lookback allowance. Otherwise a failure outside the required
+ # window incorrectly delays admission by another sampling interval.
+ anchors=[i for i,x in enumerate(recent) if now-x['time']>=seconds]
+ if not anchors:return False
+ recent=recent[anchors[-1]:]
  if now-recent[-1]['time']>90:return False
  return all(not x['reasons'] for x in recent) and all(0<b['time']-a['time']<=90 for a,b in zip(recent,recent[1:]))
 

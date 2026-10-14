@@ -19,9 +19,10 @@
 
 - `windows_clock.py` 从目标页表映射的共享用户页读取 Windows 系统时间，以高低字重读排除撕裂；偏移只从已验证 PDB 生成，不使用猜测偏移。
 - `verify-semantics.py` 离线读取独占盘真值，用 Windows 时钟区间筛选稳定样本，核对 generation、进程身份、子进程、DLL 和内核模块；所有请求均进入覆盖率分母，变化窗口和不可用分别计数。默认 50 ms 余量仍须实际校准，运行测试完成前不算 P6 验收。
+- `extract-offline.py` 从关闭且未被 QEMU 使用的 P6 磁盘克隆提取 `p6-truth.jsonl`；只读 loop，不修复文件系统。
 - `verify-workload.py` 检查指定 workload 实例的逐 CPU/I/O 进展、错误、时长和生命周期计数；它不验证外部语义。
 - `guest-probe.py` 和 `run-attempt.py` 采集 Linux 持续 TCP、fsync/readback、I/O 用时与可选外部观察。后者只接受已经启动且 idle 的 r5 Linux，以及 `state-p6/windows.qcow2` 专用克隆；默认采集结束请求关闭外层 VM，仍须单独做冷盘校验。`--keep-running` 仅供后续恢复试验。
-- 本地合计 16 项 P6 测试通过；新路径还没有实机数据。PDB 时钟类型需在 dev 资源准入后重新生成。
+- 本地合计 17 项 P6 测试通过；新路径还没有实机数据。PDB 时钟类型需在 dev 资源准入后重新生成。
 
 共享页与时间字段依据微软的 [!kuser 文档](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-kuser)、[KUSER_SHARED_DATA 定义](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data) 和 [系统时间说明](https://learn.microsoft.com/en-us/windows/win32/sysinfo/system-time)。TSC 保留为诊断数据，验收器使用 Windows 系统时间区间，并核查其推进与 Linux 单调时钟一致。
 
@@ -47,7 +48,7 @@ python3 -m unittest discover -s p6 -p 'test*.py'
 python3 -m unittest discover -s p5 -p 'test*.py'
 ```
 
-gate 返回 0 表示准入，75 表示等待；一次通过采样不构成连续窗口。
+gate 返回 0 表示准入，75 表示等待；一次通过采样不构成连续窗口。取窗口起点前最近一个采样作为边界，窗口外更早的失败不延长等待；窗口内任何失败、缺口或过期仍拒绝。
 
 ## 构建与部署
 
