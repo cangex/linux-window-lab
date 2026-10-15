@@ -7,12 +7,13 @@ our verified build's PDB, not a guessed structure version.
 SHARED_USER_DATA=0x7ffe0000
 class UnstableClock(Exception):pass
 
-def read_clock(virtual,profile,build):
+def read_clock(virtual,profile,build,field='SystemTime'):
+ if field not in ('SystemTime','InterruptTime'):raise ValueError('unsupported shared time field')
  shared=profile['types']['_KUSER_SHARED_DATA']['fields']
  fields=profile['types']['_KSYSTEM_TIME']['fields']
  if virtual.u32(SHARED_USER_DATA+shared['NtBuildNumber'])&0xffff!=build:
   raise UnstableClock('shared clock build differs from discovered kernel')
- base=SHARED_USER_DATA+shared['SystemTime']
+ base=SHARED_USER_DATA+shared[field]
  for _ in range(4):
   hi1=virtual.u32(base+fields['High1Time'])
   lo=virtual.u32(base+fields['LowPart'])

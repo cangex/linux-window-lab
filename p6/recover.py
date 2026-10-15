@@ -7,6 +7,7 @@ import argparse,ctypes,errno,fcntl,json,os,socket,struct,subprocess,sys,time
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'p5'))
 from observer import Physical,Virtual,bootstrap,processes,Unavailable
+from windows_clock import SHARED_USER_DATA,read_clock
 p=argparse.ArgumentParser();p.add_argument('profile',type=Path);a=p.parse_args()
 assert socket.gethostname()=='lwlab-boot'
 assert os.uname().release=='6.18.0-rc3-lwlab-p6'
@@ -40,7 +41,10 @@ def running(memory,boot):
   cpus.append(row)
  target=next((x for x in processes(memory,profile,boot) if x['name'].lower()=='lwtruth.exe'),None)
  if target is None:raise Unavailable('workload not running yet')
- return dict(target=target,cpus=cpus)
+ cv=Virtual(memory,target['cr3']);shared=profile['types']['_KUSER_SHARED_DATA']['fields']
+ uptime=read_clock(cv,profile,boot['build'],'InterruptTime')
+ boot_id=cv.u32(SHARED_USER_DATA+shared['BootId'])
+ return dict(target=target,cpus=cpus,windows_boot_id=boot_id,interrupt_time_100ns=uptime)
 profile=json.loads(a.profile.read_text());bootid=Path('/proc/sys/kernel/random/boot_id').read_text()
 old=Physical();before=bootstrap(old,profile);old_running=running(old,before);previous=state();report('before',state=previous,bootstrap=before,running=old_running,linux_boot_id=bootid.strip())
 command('stop');stopped=state();report('stop',state=stopped)
@@ -50,7 +54,7 @@ assert stale(old.fd) and stale_read(old)
 # path has checked parking nonces, NVMe RDY=0, pending transactions and reset.
 config=Path('/sys/bus/pci/devices/0000:81:00.0/config')
 with config.open('rb') as f:
- f.seek(4);pci_command=int.from_bytes(f.read(2),'little')
+ f.seek(4);command_bytes=f.read(2);assert len(command_bytes)==2;pci_command=int.from_bytes(command_bytes,'little')
 assert not pci_command&4,'NVMe bus mastering still enabled'
 report('quiescence',pci_command=pci_command,bus_master_disabled=True,
  kernel_log=subprocess.check_output(['dmesg'],text=True).splitlines()[-25:])
@@ -84,9 +88,11 @@ while True:
   if time.monotonic()>deadline:raise
   time.sleep(2)
 assert first['target']['created']!=old_running['target']['created'],'old workload identity survived restart'
+assert first['windows_boot_id']!=old_running['windows_boot_id'],'Windows boot ID did not change'
 time.sleep(10)
 last=running(current,after)
 assert last['target']['created']==first['target']['created']
+assert last['windows_boot_id']==first['windows_boot_id'] and last['interrupt_time_100ns']>first['interrupt_time_100ns']
 assert all(b['CycleTime']>a['CycleTime'] for a,b in zip(first['cpus'],last['cpus']))
 assert Path('/proc/sys/kernel/random/boot_id').read_text()==bootid
 report('result',partition_bootstrap_passed=True,old_info_and_read_rejected=stale(old.fd) and stale_read(old),linux_boot_id=bootid.strip(),old_generation=old.generation,new_generation=generation,bootstrap=after,running_before=first,running_after=last,

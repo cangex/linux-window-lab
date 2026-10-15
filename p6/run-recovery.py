@@ -75,7 +75,8 @@ try:
     (out / 'vm.xml').write_text(xml)
     (out / 'before.json').write_text(json.dumps(dict(boot_id=bootid, status=before, cycles=a.cycles)))
     guest('test ! -e ' + shlex.quote(stop))
-    run(['scp', '-i', root / 'keys/guest_ed25519', repo / 'p6/recover.py', repo / 'p6/recovery-probe.py',
+    run(['scp', '-i', root / 'keys/guest_ed25519', repo / 'p6/recover.py', repo / 'p6/recovery-probe.py', repo / 'p6/windows_clock.py',
+         root / 'artifacts/p6/p6-cpu-profile-recovery.json',
          'lab@192.168.231.11:/tmp/p6-run/p6/'])
     started = True
     duration = a.cycles*360+120
@@ -90,7 +91,7 @@ try:
     for cycle in range(a.cycles):
         resource()
         log = out / f'cycle-{cycle+1:02}.jsonl'
-        proc = launch(ssh + ['sudo timeout 330 python3 /tmp/p6-run/p6/recover.py /tmp/p6-run/p6/p6-cpu-profile.json'], log)
+        proc = launch(ssh + ['sudo timeout 330 python3 /tmp/p6-run/p6/recover.py /tmp/p6-run/p6/p6-cpu-profile-recovery.json'], log)
         deadline = time.monotonic()+345
         while proc.poll() is None:
             resource()
