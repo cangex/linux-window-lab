@@ -32,21 +32,31 @@ def select_truth(truth, observations):
     return matching, nonces.pop()
 
 
+def select_new_truth(truth, previous_nonces):
+    nonces = {row['nonce'] for row in truth} - set(previous_nonces)
+    if len(nonces) != 1:
+        raise ValueError('observer-off run requires exactly one new workload instance')
+    nonce = nonces.pop()
+    return [row for row in truth if row['nonce'] == nonce], nonce
+
+
 def verify(directory):
     before = json.loads((directory / 'before.json').read_text())
     collection = json.loads((directory / 'collection-result.json').read_text())
     linux = json.loads((directory / 'linux/result.json').read_text())
-    observations = read_rows(directory / 'observations.jsonl')
-    truth, nonce = select_truth(read_rows(directory / 'p6-truth.jsonl'), observations)
+    observed = before['observer_enabled']
+    observations = read_rows(directory / 'observations.jsonl') if observed else []
+    all_truth = read_rows(directory / 'p6-truth.jsonl')
+    truth, nonce = select_truth(all_truth, observations) if observed else select_new_truth(all_truth, before['truth_nonces_before'])
     workload = load_module('verify-workload').verify(truth, before['cpus'], before['seconds'])
-    semantics = load_module('verify-semantics').verify(truth, observations, nonce)
+    semantics = load_module('verify-semantics').verify(truth, observations, nonce) if observed else None
     bootstraps = [row for row in observations if row['event'] == 'bootstrap']
     errors = []
     if not collection['collection_passed']:
         errors.append('collection_failed')
     if not linux['pass'] or linux['boot_id'] != before['boot_id'] or linux['elapsed'] < before['seconds']:
         errors.append('linux_continuity_failed')
-    if len(bootstraps) != 1 or bootstraps[0]['generation'] != linux['guest']['generation']:
+    if observed and (len(bootstraps) != 1 or bootstraps[0]['generation'] != linux['guest']['generation']):
         errors.append('generation_mismatch')
     # Require actual PRCB execution progression on every assigned CPU as well
     # as the separately checked workload thread counters from cold storage.
@@ -54,17 +64,17 @@ def verify(directory):
     for row in samples:
         if [(cpu['Number'], cpu['InitialApicId']) for cpu in row['cpus']] != [(i, 4+i) for i in range(before['cpus'])]:
             raise ValueError('unexpected observed CPU ownership')
-    cpu_progress = [samples[-1]['cpus'][i]['CycleTime'] - samples[0]['cpus'][i]['CycleTime'] for i in range(before['cpus'])]
+    cpu_progress = [samples[-1]['cpus'][i]['CycleTime'] - samples[0]['cpus'][i]['CycleTime'] for i in range(before['cpus'])] if observed else []
     if any(delta <= 0 for delta in cpu_progress):
         errors.append('cpu_execution_not_advancing')
     anomalies = [line for line in (directory / 'dmesg.txt').read_text().splitlines()
                  if re.search(r'(?i)(\brcu\b.*\bstall\b|soft lockup|hard LOCKUP|\bBUG:|\bOops:|Kernel panic)', line)]
     if anomalies:
         errors.append('linux_kernel_anomaly')
-    if not semantics['passed']:
+    if observed and not semantics['passed']:
         errors.append('semantics_failed')
     return dict(attempt_passed=not errors, errors=errors, formal_p6_acceptance=False,
-                scope='one cold-start load and observation attempt', workload=workload,
+                scope='one cold-start load attempt', observer_enabled=observed, workload=workload,
                 semantics=semantics, linux=linux, cpu_cycle_deltas=cpu_progress,
                 kernel_anomalies=anomalies,
                 lifecycle_observation_target_met=min(workload[k] for k in ('child_starts', 'child_ends', 'dll_loads', 'dll_unloads')) >= 100)

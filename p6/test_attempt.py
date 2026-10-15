@@ -8,6 +8,12 @@ spec.loader.exec_module(m)
 
 
 class Attempt(unittest.TestCase):
+    def test_observer_off_rejects_missing_or_multiple_new_instances(self):
+        rows, nonce = m.select_new_truth([dict(nonce='old'), dict(nonce='new')], ['old'])
+        self.assertEqual((rows, nonce), ([dict(nonce='new')], 'new'))
+        for rows in ([dict(nonce='old')], [dict(nonce='a'), dict(nonce='b')]):
+            with self.assertRaises(ValueError):
+                m.select_new_truth(rows, ['old'])
     def test_selects_observed_identity_not_last_boot(self):
         truth = [dict(pid=10, created=20, nonce='observed'), dict(pid=10, created=30, nonce='later')]
         observations = [dict(event='sample', target=dict(pid=10, created=20))]

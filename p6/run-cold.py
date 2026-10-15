@@ -14,6 +14,8 @@ p.add_argument('name')
 p.add_argument('--seconds', type=int, required=True)
 p.add_argument('--cpus', type=int, choices=(1, 2, 4), required=True)
 p.add_argument('--keep-running', action='store_true')
+p.add_argument('--no-observe', action='store_true')
+p.add_argument('--previous-truth', type=Path)
 a = p.parse_args()
 assert a.name.replace('-', '').replace('_', '').isalnum() and a.seconds >= 30
 root = Path('/data/linux-window-lab')
@@ -52,6 +54,13 @@ try:
     assert all(x.get('nodeset') == gate.NODESET for x in tuning.findall('memnode'))
     assert '/state-p6/windows.qcow2' in xml
     (control / 'vm.xml').write_text(xml)
+    (control / 'source-commit.txt').write_text(run(['git', '-C', str(repo), 'rev-parse', 'HEAD']))
+    if a.no_observe:
+        assert a.previous_truth and a.previous_truth.name == 'p6-truth.jsonl'
+        assert a.previous_truth.resolve().is_relative_to(root / 'artifacts/p6')
+        previous = a.previous_truth.parent
+        assert json.loads((previous / 'attempt-verification.json').read_text())['attempt_passed']
+        run(['qemu-img', 'compare', str(root / 'state-p6/windows.qcow2'), str(previous / 'windows.qcow2')], timeout=300)
     firmware = root / 'artifacts/p6' / ('p6-package-r5/partition.bin' if a.cpus == 4 else f'firmware-r5-cpu{a.cpus}/partition.bin')
     expected = json.loads((repo / 'p6/firmware-sha256.json').read_text())[str(a.cpus)]
     assert hashlib.sha256(firmware.read_bytes()).hexdigest() == expected
@@ -79,6 +88,8 @@ try:
     command = ['python3', str(repo / 'p6/run-attempt.py'), a.name, '--seconds', str(a.seconds), '--cpus', str(a.cpus), '--windows-clock']
     if a.keep_running:
         command.append('--keep-running')
+    if a.no_observe:
+        command += ['--no-observe', '--previous-truth', str(a.previous_truth)]
     subprocess.run(command, check=True)
     passed = True
 finally:

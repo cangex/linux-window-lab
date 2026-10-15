@@ -4,12 +4,14 @@
 Does not claim workload/semantic acceptance: validate recovered cold-disk truth
 separately. Default cleanup shuts down the outer VM, never counts as recovery.
 """
-import argparse,importlib.util,json,shlex,subprocess,time
+import argparse,hashlib,importlib.util,json,shlex,subprocess,time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('name');p.add_argument('--seconds',type=int,required=True)
 p.add_argument('--cpus',type=int,choices=(1,2,4),required=True);p.add_argument('--no-observe',action='store_true')
-p.add_argument('--windows-clock',action='store_true');p.add_argument('--keep-running',action='store_true');a=p.parse_args()
+p.add_argument('--windows-clock',action='store_true');p.add_argument('--keep-running',action='store_true')
+p.add_argument('--previous-truth',type=Path);a=p.parse_args()
+if a.no_observe and not a.previous_truth:p.error('observer-off runs require verified previous cold truth')
 if not a.name.replace('-','').replace('_','').isalnum() or a.seconds<30:p.error('valid attempt name and >=30 seconds required')
 root=Path('/data/linux-window-lab');repo=root/'repo';out=root/'artifacts/p6'/a.name
 assert not out.exists();out.mkdir()
@@ -45,7 +47,11 @@ try:
  run(['scp','-i',root/'keys/guest_ed25519',repo/'p5/observer.py','lab@192.168.231.11:/tmp/p6-run/p5/'])
  run(['scp','-i',root/'keys/guest_ed25519',*[repo/'p6'/n for n in ('guest-probe.py','observe.py','windows_clock.py')],out/'clock.so',profile,'lab@192.168.231.11:/tmp/p6-run/p6/'])
  bootid=guest('cat /proc/sys/kernel/random/boot_id').strip()
- (out/'before.json').write_text(json.dumps(dict(boot_id=bootid,cpus=a.cpus,seconds=a.seconds,observer_enabled=not a.no_observe,windows_clock=a.windows_clock,firmware=guest('sha256sum /lib/firmware/lwlab/partition-p3.bin').split()[0],cmdline=guest('cat /proc/cmdline'))))
+ before=dict(boot_id=bootid,cpus=a.cpus,seconds=a.seconds,observer_enabled=not a.no_observe,windows_clock=a.windows_clock,firmware=firmware,cmdline=guest('cat /proc/cmdline'))
+ if a.previous_truth:
+  data=a.previous_truth.read_bytes()
+  before.update(truth_nonces_before=sorted({json.loads(x)['nonce'] for x in data.decode('utf-8-sig').splitlines() if x.strip()}),previous_truth_sha256=hashlib.sha256(data).hexdigest())
+ (out/'before.json').write_text(json.dumps(before))
  def launch(command,path):
   f=path.open('w');files.append(f);proc=subprocess.Popen(command,stdout=f,stderr=f);processes.append(proc);return proc
  linux=launch(ssh+[f'sudo timeout {a.seconds+400} python3 /tmp/p6-run/p6/guest-probe.py --seconds {a.seconds+240}'],out/'linux-guest.log');started=True

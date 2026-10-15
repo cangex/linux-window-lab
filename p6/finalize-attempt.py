@@ -13,6 +13,7 @@ import subprocess
 
 p = argparse.ArgumentParser()
 p.add_argument('name')
+p.add_argument('--recovery', action='store_true')
 a = p.parse_args()
 assert a.name.replace('-', '').replace('_', '').isalnum()
 root = Path('/data/linux-window-lab')
@@ -45,8 +46,9 @@ with snapshot.open('rb') as file:
     digest = hashlib.file_digest(file, 'sha256').hexdigest()
 (out / 'disk-archive.json').write_text(json.dumps(dict(qcow2_sha256=digest, backing_chain=chain,
     guest_bytes_equal_to_raw=True, immutable_backing_sha256=backing_hashes), indent=2)+'\n')
-with (out / 'attempt-verification.json').open('w') as log, (out / 'verification-error.log').open('w') as errors:
-    result = subprocess.run(['python3', str(root / 'repo/p6/verify-attempt.py'), str(out)], stdout=log, stderr=errors, timeout=180)
+name = 'recovery' if a.recovery else 'attempt'
+with (out / (name+'-verification.json')).open('w') as log, (out / 'verification-error.log').open('w') as errors:
+    result = subprocess.run(['python3', str(root / ('repo/p6/verify-'+name+'.py')), str(out)], stdout=log, stderr=errors, timeout=180)
 if result.returncode == 0:
     # qemu-img compare checked logical disk bytes, including zero regions.
     # This removes only the redundant encoding; the snapshot is never reused.
