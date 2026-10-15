@@ -128,6 +128,10 @@ finally:
     if started:
         try:
             subprocess.run(ssh + ['sudo poweroff'], capture_output=True, timeout=30)
+            deadline=time.monotonic()+120
+            while run(['sudo','-n','virsh','domstate','lwlab-boot']).strip()!='shut off':
+                assert time.monotonic()<deadline,'outer VM did not stop; cold disk access prohibited'
+                time.sleep(2)
         except Exception as exc:
             failure = (failure or '') + '; shutdown: ' + repr(exc)
     for proc in processes:

@@ -14,8 +14,11 @@ import importlib.util
 p = argparse.ArgumentParser()
 p.add_argument('name')
 p.add_argument('--through', choices=('single-recovery', 'restarts', 'cold-matrix', 'long-runs'), required=True)
+p.add_argument('--initial', default='r5-mp4-30m-02')
+p.add_argument('--firmware-mode', choices=('r5','hal-enforce'), default='r5')
 a = p.parse_args()
 assert a.name.replace('-', '').replace('_', '').isalnum()
+assert a.initial.replace('-', '').replace('_', '').isalnum()
 root = Path('/data/linux-window-lab')
 repo = root / 'repo'
 artifacts = root / 'artifacts/p6'
@@ -25,7 +28,7 @@ spec = importlib.util.spec_from_file_location('gate', repo / 'p6/resource-gate.p
 gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
 source = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
-state = dict(source_commit=source, through=a.through, state='running', phase='initial-30m', completed=[],
+state = dict(source_commit=source, through=a.through, firmware_mode=a.firmware_mode,initial=a.initial,state='running', phase='initial-30m', completed=[],
              p6_complete=False, started=time.time(), controlled_fault_matrix_complete=False)
 
 
@@ -85,7 +88,7 @@ def verified(name, recovery=False):
 def cold(name, cpus, seconds, previous_truth=None):
     phase(name+'-admission')
     admission()
-    command = ['python3', str(repo / 'p6/run-cold.py'), name, '--cpus', str(cpus), '--seconds', str(seconds)]
+    command = ['python3', str(repo / 'p6/run-cold.py'), name, '--cpus', str(cpus), '--seconds', str(seconds),'--firmware-mode',a.firmware_mode]
     if previous_truth:
         command += ['--no-observe', '--previous-truth', str(previous_truth)]
     execute(name, command)
@@ -96,8 +99,8 @@ def restart(name, cycles):
     phase(name+'-admission')
     admission()
     prime = name+'-prime'
-    execute(prime, ['python3', str(repo / 'p6/run-cold.py'), prime, '--cpus', '4', '--seconds', '60', '--keep-running'])
-    execute(name, ['python3', str(repo / 'p6/run-recovery.py'), name, '--cycles', str(cycles)])
+    execute(prime, ['python3', str(repo / 'p6/run-cold.py'), prime, '--cpus', '4', '--seconds', '60', '--keep-running','--firmware-mode',a.firmware_mode])
+    execute(name, ['python3', str(repo / 'p6/run-recovery.py'), name, '--cycles', str(cycles),'--firmware-mode',a.firmware_mode])
     verified(name, recovery=True)
 
 
@@ -105,33 +108,35 @@ try:
     save()
     # This first run was already dispatched interactively. Its separate
     # finalizer must succeed; never replace failure evidence with a retry.
-    initial = artifacts / 'r5-mp4-30m-02'
+    initial = artifacts / a.initial
     assert not (initial / 'invalidated.json').exists(), 'initial run was invalidated by evidence review'
     deadline = time.monotonic()+2700
     while True:
-        assert not (artifacts / 'r5-mp4-30m-02-finalize-error.json').exists(), 'initial cold verification failed'
+        assert not (artifacts / (a.initial+'-finalize-error.json')).exists(), 'initial cold verification failed'
         assert time.monotonic() < deadline, 'initial attempt deadline expired'
         try:
             result = json.loads((initial / 'attempt-verification.json').read_text())
             assert result['attempt_passed'], 'initial attempt failed'
+            before=json.loads((initial/'before.json').read_text())
+            assert before.get('firmware_mode','r5')==a.firmware_mode and before['seconds']>=1800 and before['cpus']==4
             break
         except (FileNotFoundError, json.JSONDecodeError):
             time.sleep(15)
     off()
     state['completed'].append(dict(name=initial.name, verification=str(initial / 'attempt-verification.json')))
-    restart('r5-recovery-single-01', 1)
+    restart(a.name+'-recovery-single', 1)
     if a.through != 'single-recovery':
-        restart('r5-recovery-ten-01', 10)
+        restart(a.name+'-recovery-ten', 10)
     if a.through in ('cold-matrix', 'long-runs'):
         for cpus in (1, 2):
             for index in range(1, 4):
-                cold(f'r5-cpu{cpus}-30m-{index:02}', cpus, 1800)
-        for index in range(3, 12):
-            cold(f'r5-mp4-30m-{index:02}', 4, 1800)
+                cold(f'{a.name}-cpu{cpus}-30m-{index:02}', cpus, 1800)
+        for index in range(2, 11):
+            cold(f'{a.name}-mp4-30m-{index:02}', 4, 1800)
     if a.through == 'long-runs':
-        cold('r5-mp4-2h-01', 4, 7200)
-        cold('r5-mp4-24h-01', 4, 86400)
-        cold('r5-mp4-observer-off-01', 4, 1800, artifacts / 'r5-mp4-24h-01/p6-truth.jsonl')
+        cold(a.name+'-mp4-2h', 4, 7200)
+        cold(a.name+'-mp4-24h', 4, 86400)
+        cold(a.name+'-mp4-observer-off', 4, 1800, artifacts / (a.name+'-mp4-24h/p6-truth.jsonl'))
     state['state'] = 'requested-sequence-verified'
     state['outstanding'] = ['controlled fault matrix', 'observation identity reuse/paging/unsupported-profile stress',
                             'full P6 acceptance review']

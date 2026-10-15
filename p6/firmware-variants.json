@@ -1,5 +1,13 @@
 {
   "hal-enforce": {
+    "1": {
+      "directory": "firmware-hal-enforce-cpu1",
+      "sha256": "65100c5bf00f9eeae475c585505b67d03bd89ad299315235ac5c2ee41c01ef2d"
+    },
+    "2": {
+      "directory": "firmware-hal-enforce-cpu2",
+      "sha256": "6de23187cba50c63abe15a0435d9f2b56c2b53139daad27a1a2b49db6725687a"
+    },
     "4": {
       "directory": "firmware-hal-enforce",
       "sha256": "d71189ccd4eb95ed5a470ddf410e614e4743bbfa4e7cd67b019fa2301b3a294a"
