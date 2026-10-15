@@ -5,6 +5,7 @@ Does not claim workload/semantic acceptance: validate recovered cold-disk truth
 separately. Default cleanup shuts down the outer VM, never counts as recovery.
 """
 import argparse,importlib.util,json,shlex,subprocess,time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('name');p.add_argument('--seconds',type=int,required=True)
 p.add_argument('--cpus',type=int,choices=(1,2,4),required=True);p.add_argument('--no-observe',action='store_true')
@@ -15,7 +16,7 @@ assert not out.exists();out.mkdir()
 spec=importlib.util.spec_from_file_location('gate',repo/'p6/resource-gate.py');gate=importlib.util.module_from_spec(spec);spec.loader.exec_module(gate)
 def latest(admission=False):
  rows=[json.loads(x) for x in (root/'artifacts/p6/resource-history.jsonl').read_text().splitlines()]
- if not rows or not 0<=time.time()-rows[-1]['time']<=90 or rows[-1]['reasons']:raise RuntimeError('host resource gate unavailable/failed')
+ if not rows or not 0<=time.time()-rows[-1]['time']<=90 or rows[-1].get('policy')!=gate.POLICY or gate.assess(rows[-1]):raise RuntimeError('host resource gate unavailable/failed')
  if admission and not gate.stable(rows,time.time()):raise RuntimeError('continuous admission window incomplete')
  return rows[-1]
 def run(args,**kw):return subprocess.run(list(map(str,args)),check=True,text=True,capture_output=True,timeout=120,**kw)
@@ -29,6 +30,10 @@ try:
  assert guest('cat /sys/kernel/lwlab/status').startswith('state=idle ')
  xml=run(['sudo','-n','virsh','dumpxml','lwlab-boot']).stdout
  assert '/state-p6/windows.qcow2' in xml,'dedicated P6 disk clone required'
+ tuning=ET.fromstring(xml).find('numatune')
+ assert tuning is not None and tuning.find('memory').get('nodeset')==gate.NODESET,'VM NUMA policy mismatch'
+ assert tuning.find('memory').get('mode')=='interleave'
+ assert all(x.get('nodeset')==gate.NODESET for x in tuning.findall('memnode')),'per-cell NUMA policy mismatch'
  (out/'vm.xml').write_text(xml)
  profile=root/'artifacts/p6/p6-cpu-profile.json'
  if a.windows_clock:

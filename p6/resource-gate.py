@@ -3,12 +3,16 @@
 import argparse,json,time
 from pathlib import Path
 
+POLICY = "p6-selected-numa-v2"
+SELECTED_NODES = ("node0", "node1", "node2", "node3", "node7")
+NODESET = "0-3,7"
+
 def assess(sample):
  reasons=[]
  for key,limit in [('available_gib',128),('free_gib',64),('disk_free_gib',80)]:
   if sample[key]<limit:reasons.append(key)
  if sample['psi_some_avg10']>=1:reasons.append('memory_psi')
- if min(sample['node_free_gib'].values(),default=0)<4:reasons.append('node_free_gib')
+ if any(sample['node_free_gib'].get(n,0)<4 for n in SELECTED_NODES):reasons.append('node_free_gib')
  return reasons
 
 def stable(history,now,seconds=600):
@@ -20,7 +24,7 @@ def stable(history,now,seconds=600):
  if not anchors:return False
  recent=recent[anchors[-1]:]
  if now-recent[-1]['time']>90:return False
- return all(not x['reasons'] for x in recent) and all(0<b['time']-a['time']<=90 for a,b in zip(recent,recent[1:]))
+ return all(x.get('policy') == POLICY and not x['reasons'] and not assess(x) for x in recent) and all(0<b['time']-a['time']<=90 for a,b in zip(recent,recent[1:]))
 
 def main():
  import shutil
@@ -28,13 +32,15 @@ def main():
  m={x.split(':')[0]:int(x.split()[1])/1048576 for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith(('MemAvailable:','MemFree:'))}
  psi=Path('/proc/pressure/memory').read_text().splitlines()[0]
  nodes={x.parent.name:float(next(l.split()[3] for l in x.read_text().splitlines() if 'MemFree:' in l))/1048576 for x in Path('/sys/devices/system/node').glob('node*/meminfo')}
- row=dict(time=time.time(),available_gib=m['MemAvailable'],free_gib=m['MemFree'],psi_some_avg10=float(psi.split()[1].split('=')[1]),node_free_gib=nodes,disk_free_gib=shutil.disk_usage(a.disk).free/2**30)
+ row=dict(policy=POLICY,selected_nodes=list(SELECTED_NODES),time=time.time(),available_gib=m['MemAvailable'],free_gib=m['MemFree'],psi_some_avg10=float(psi.split()[1].split('=')[1]),node_free_gib=nodes,disk_free_gib=shutil.disk_usage(a.disk).free/2**30)
  row['reasons']=assess(row)
  history=[json.loads(x) for x in a.history.read_text().splitlines()] if a.history.exists() else []
  history=[x for x in history if 0<=row['time']-x['time']<=900]+[row]
  row['admit']=stable(history,row['time'])
  a.history.parent.mkdir(parents=True,exist_ok=True)
- a.history.write_text(''.join(json.dumps(x)+'\n' for x in history))
+ temporary=a.history.with_suffix('.tmp')
+ temporary.write_text(''.join(json.dumps(x)+'\n' for x in history))
+ temporary.replace(a.history)
  print(json.dumps(row),flush=True)
  raise SystemExit(0 if row['admit'] else 75)
 if __name__=='__main__':main()
