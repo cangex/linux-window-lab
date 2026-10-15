@@ -9,8 +9,11 @@ import time
 
 p = argparse.ArgumentParser()
 p.add_argument('--seconds', type=int, required=True)
+p.add_argument('--stop-file', type=Path)
 a = p.parse_args()
 assert a.seconds >= 30
+if a.stop_file:
+    assert not a.stop_file.exists()
 assert socket.gethostname() == 'lwlab-boot'
 assert os.uname().release == '6.18.0-rc3-lwlab-p6'
 assert Path('/proc/sys/kernel/tainted').read_text().strip() == '0'
@@ -28,7 +31,7 @@ with socket.socket() as server:
         connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         began = time.monotonic()
         seq = 0
-        while time.monotonic() - began < a.seconds:
+        while time.monotonic() - began < a.seconds and not (a.stop_file and a.stop_file.exists()):
             start = time.monotonic_ns()
             data = (f'{boot}:recovery:{seq}\n'.encode() * 128)
             path = output / 'recovery-io.bin'
@@ -50,5 +53,5 @@ with socket.socket() as server:
         result = dict(kind='result', scope='linux-recovery-continuity-only',
                       boot_id=boot, samples=seq, kernel_taint=taint,
                       formal_lifecycle_acceptance=False)
-        result['pass'] = taint == 0
+        result['pass'] = taint == 0 and (not a.stop_file or a.stop_file.exists())
         connection.sendall((json.dumps(result)+'\n').encode())
