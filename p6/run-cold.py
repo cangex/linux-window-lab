@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import time
 import xml.etree.ElementTree as ET
+from firmware import firmware as resolve_firmware
 
 p = argparse.ArgumentParser()
 p.add_argument('name')
@@ -16,6 +17,7 @@ p.add_argument('--cpus', type=int, choices=(1, 2, 4), required=True)
 p.add_argument('--keep-running', action='store_true')
 p.add_argument('--no-observe', action='store_true')
 p.add_argument('--previous-truth', type=Path)
+p.add_argument('--firmware-mode', choices=('r5', 'hal-probe', 'hal-enforce'), default='r5')
 a = p.parse_args()
 assert a.name.replace('-', '').replace('_', '').isalnum() and a.seconds >= 30
 root = Path('/data/linux-window-lab')
@@ -61,8 +63,7 @@ try:
         previous = a.previous_truth.parent
         assert json.loads((previous / 'attempt-verification.json').read_text())['attempt_passed']
         run(['qemu-img', 'compare', str(root / 'state-p6/windows.qcow2'), str(previous / 'windows.qcow2')], timeout=300)
-    firmware = root / 'artifacts/p6' / ('p6-package-r5/partition.bin' if a.cpus == 4 else f'firmware-r5-cpu{a.cpus}/partition.bin')
-    expected = json.loads((repo / 'p6/firmware-sha256.json').read_text())[str(a.cpus)]
+    firmware, expected = resolve_firmware(root, a.cpus, a.firmware_mode)
     assert hashlib.sha256(firmware.read_bytes()).hexdigest() == expected
     rows = check_gate(True)
     (control / 'admission.json').write_text(json.dumps(dict(time=time.time(), samples=rows), indent=2))
@@ -85,7 +86,7 @@ try:
     pid = run(['sudo', '-n', 'cat', '/run/libvirt/qemu/lwlab-boot.pid']).strip()
     assert pid.isdigit()
     (control / 'numa_maps.txt').write_text(run(['sudo', '-n', 'cat', f'/proc/{pid}/numa_maps']))
-    command = ['python3', str(repo / 'p6/run-attempt.py'), a.name, '--seconds', str(a.seconds), '--cpus', str(a.cpus), '--windows-clock']
+    command = ['python3', str(repo / 'p6/run-attempt.py'), a.name, '--seconds', str(a.seconds), '--cpus', str(a.cpus), '--windows-clock', '--firmware-mode', a.firmware_mode]
     if a.keep_running:
         command.append('--keep-running')
     if a.no_observe:

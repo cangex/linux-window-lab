@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """P6 fixed-Q35 multi-AP platform, retaining P5's memory/device ownership."""
-import argparse,json,subprocess
+import argparse,json,subprocess,shutil
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('output',type=Path);p.add_argument('--disk',type=Path,required=True)
-p.add_argument('--cpus',type=int,choices=(1,2,4),required=True);a=p.parse_args()
+p.add_argument('--cpus',type=int,choices=(1,2,4),required=True)
+p.add_argument('--hal-ipi-mode',choices=('probe','enforce'))
+a=p.parse_args()
 here=Path(__file__).resolve().parent
 subprocess.run(['python3',str(here.parent/'p5/stage.py'),str(a.output),'--disk',str(a.disk),
  '--platform',str(here.parent/'p5/platform.json')],check=True)
@@ -40,4 +42,13 @@ edit('verify-image.py',"struct.pack('<BBBBI',0,8,c['apic_id'],c['apic_id'],1)",
  "b''.join(struct.pack('<BBBBI',0,8,i,i,1) for i in c['windows_apic_ids'])")
 edit('verify-image.py',"assert cpus==[(c['apic_id'],1)]","assert cpus==[(i,1) for i in c['windows_apic_ids']]")
 edit('verify-image.py',"'MADT single AP/IOAPIC'","'MADT partition CPUs/IOAPIC'")
-print(json.dumps(dict(stage=str(a.output),windows_cpus=cpus,linux_cpus=[0,1,2,3])))
+if a.hal_ipi_mode:
+ directory=a.output/'LwPartitionPkg/LwBdsDxe'
+ shutil.copy2(here/'HalIpi.h',directory/'HalIpi.h')
+ edit('LwPartitionPkg/LwBdsDxe/LwBdsDxe.c','#include "RamGop.h"',
+  '#include "RamGop.h"\n#define LW_HAL_IPI_MODE '+str(1 if a.hal_ipi_mode=='probe' else 2)+'\n#include "HalIpi.h"')
+ edit('LwPartitionPkg/LwBdsDxe/LwBdsDxe.c','if (!EFI_ERROR(Status)) { LW_MBOX->Phase=21;',
+  'if (!EFI_ERROR(Status)) { LwHalIpiConfigure(); LW_MBOX->Phase=21;')
+ c['p6_hal_ipi_mode']=a.hal_ipi_mode
+ manifest.write_text(json.dumps(c,indent=2)+'\n')
+print(json.dumps(dict(stage=str(a.output),windows_cpus=cpus,linux_cpus=[0,1,2,3],hal_ipi_mode=a.hal_ipi_mode)))

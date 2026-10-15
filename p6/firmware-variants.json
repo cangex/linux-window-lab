@@ -1,0 +1,8 @@
+{
+  "hal-probe": {
+    "4": {
+      "directory": "firmware-hal-probe",
+      "sha256": "a22f43c93f00d46cb6d110896d25d44e771432e1986df683f7b66c3453b4b4bb"
+    }
+  }
+}
