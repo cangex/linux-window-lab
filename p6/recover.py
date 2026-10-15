@@ -3,10 +3,10 @@
 
 Never power-cycle the outer VM. Failed quiescence aborts without preparing RAM.
 """
-import argparse,errno,fcntl,json,os,socket,sys,time
+import argparse,ctypes,errno,fcntl,json,os,socket,struct,subprocess,sys,time
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'p5'))
-from observer import Physical,bootstrap,Unavailable
+from observer import Physical,Virtual,bootstrap,processes,Unavailable
 p=argparse.ArgumentParser();p.add_argument('profile',type=Path);a=p.parse_args()
 assert socket.gethostname()=='lwlab-boot'
 assert os.uname().release=='6.18.0-rc3-lwlab-p6'
@@ -22,11 +22,38 @@ def stale(fd):
  except OSError as e:
   assert e.errno==errno.ESTALE,e;return True
  raise AssertionError('revoked handle still readable')
+def stale_read(memory):
+ buffer=ctypes.create_string_buffer(8)
+ request=struct.pack('<4Q',memory.generation,memory.extents[0][0],8,ctypes.addressof(buffer))
+ try:fcntl.ioctl(memory.fd,0x40205741,request)
+ except OSError as e:
+  assert e.errno==errno.ESTALE,e;return True
+ raise AssertionError('revoked handle accepted physical read')
+def running(memory,boot):
+ v=Virtual(memory,boot['cr3']);kernel=boot['kernel'];off=profile['types']['_KPRCB']['fields']
+ count=v.u32(kernel+profile['symbols']['KeNumberProcessors']);assert count==4
+ cpus=[]
+ for i in range(count):
+  prcb=v.u64(kernel+profile['symbols']['KiProcessorBlock']+8*i)
+  row={k:(v.u64 if k in ('CurrentThread','CycleTime') else v.u32)(prcb+o) for k,o in off.items()}
+  assert row['Number']==i and row['InitialApicId']==4+i
+  cpus.append(row)
+ target=next((x for x in processes(memory,profile,boot) if x['name'].lower()=='lwtruth.exe'),None)
+ if target is None:raise Unavailable('workload not running yet')
+ return dict(target=target,cpus=cpus)
 profile=json.loads(a.profile.read_text());bootid=Path('/proc/sys/kernel/random/boot_id').read_text()
-old=Physical();before=bootstrap(old,profile);previous=state();report('before',state=previous,bootstrap=before,linux_boot_id=bootid.strip())
+old=Physical();before=bootstrap(old,profile);old_running=running(old,before);previous=state();report('before',state=previous,bootstrap=before,running=old_running,linux_boot_id=bootid.strip())
 command('stop');stopped=state();report('stop',state=stopped)
 assert stopped['state']=='stopped' and stopped['started']=='0'
-assert stale(old.fd)
+assert stale(old.fd) and stale_read(old)
+# Read only the owned endpoint's PCI command register after the kernel stop
+# path has checked parking nonces, NVMe RDY=0, pending transactions and reset.
+config=Path('/sys/bus/pci/devices/0000:81:00.0/config')
+with config.open('rb') as f:
+ f.seek(4);pci_command=int.from_bytes(f.read(2),'little')
+assert not pci_command&4,'NVMe bus mastering still enabled'
+report('quiescence',pci_command=pci_command,bus_master_disabled=True,
+ kernel_log=subprocess.check_output(['dmesg'],text=True).splitlines()[-25:])
 try:fresh=Physical()
 except OSError as e:assert e.errno==errno.EAGAIN,e
 else:os.close(fresh.fd);raise AssertionError('open accepted while stopped')
@@ -37,7 +64,7 @@ else:raise AssertionError('generation reuse accepted')
 assert state()['state']=='stopped'
 generation=max(time.time_ns(),old.generation+1)
 command(f'prepare 3 4 10000000 60000000 10010000 {generation} 0')
-assert state()['state']=='loaded';assert stale(old.fd)
+assert state()['state']=='loaded';assert stale(old.fd) and stale_read(old)
 command('start');deadline=time.monotonic()+240
 while True:
  try:
@@ -49,7 +76,19 @@ while True:
   if time.monotonic()>deadline:raise
   time.sleep(2)
 assert current.generation==generation and stale(old.fd)
+while True:
+ try:
+  first=running(current,after)
+  break
+ except Unavailable:
+  if time.monotonic()>deadline:raise
+  time.sleep(2)
+assert first['target']['created']!=old_running['target']['created'],'old workload identity survived restart'
+time.sleep(10)
+last=running(current,after)
+assert last['target']['created']==first['target']['created']
+assert all(b['CycleTime']>a['CycleTime'] for a,b in zip(first['cpus'],last['cpus']))
 assert Path('/proc/sys/kernel/random/boot_id').read_text()==bootid
-report('result',partition_bootstrap_passed=True,linux_boot_id=bootid.strip(),old_generation=old.generation,new_generation=generation,bootstrap=after,
+report('result',partition_bootstrap_passed=True,old_info_and_read_rejected=stale(old.fd) and stale_read(old),linux_boot_id=bootid.strip(),old_generation=old.generation,new_generation=generation,bootstrap=after,running_before=first,running_after=last,
  formal_lifecycle_acceptance=False,note='Requires independent CPU/workload/network evidence and repeated fault matrix')
 os.close(old.fd);os.close(current.fd)
