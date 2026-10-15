@@ -15,6 +15,8 @@
 - `recovery-probe.py`：独立 Linux TCP/fsync/readback 流，不持有 loader 状态锁，用于覆盖 stop/prepare 的完整时间。`recover.py` 还检查旧 fd 的 INFO/READ 拒绝、NVMe bus master 关闭、新 workload 身份及四个 PRCB 的执行进展；这些新检查仍待运行验证。
 - `setup.ps1`、`console.py`：仅用于普通激活 VM，安装须提升权限。关闭休眠后完整关机，避免离线修改处于休眠状态的 NTFS。QMP 仅用于安装界面，不能充当外部内存读取验收路径。
 - `resource-gate.py`：宿主机只读资源采样；只写实验历史文件，不启动或关闭 VM。
+- `run-cold.py`：一次冷启动，启动前核对连续资源窗口、NUMA 配置和 CPU 对应固件哈希。`finalize-attempt.py` 关闭后提取真值并验证；通过时保留与 RAW 逐字节比较一致的 qcow2 副本及已校验 backing chain，删除冗余 RAW，失败时保留 RAW。
+- `campaign.py`：有限顺序任务，任一步失败停止，不自动重试，不创建定时任务。可依次执行单次/十次独立重启、冷启动矩阵和 2 小时/24 小时长稳。其完成仍不代表受控故障矩阵、观察压力测试或整个 P6 完成。
 
 ## 10 月 15 日续作工具（尚待 VM 验证）
 
@@ -24,7 +26,7 @@
 - `verify-workload.py` 检查指定 workload 实例的逐 CPU/I/O 进展、错误、时长和生命周期计数；它不验证外部语义。
 - `verify-attempt.py` 根据外部观察的 PID/CreateTime 选择冷盘真值，汇总采集结果、Linux 连续性、Windows 负载、CPU 归属/进展、语义覆盖和内核异常。单轮通过不等于 P6 整体通过；进程/DLL 100 次目标单列。
 - `guest-probe.py` 和 `run-attempt.py` 采集 Linux 持续 TCP、fsync/readback、I/O 用时与可选外部观察。后者只接受已经启动且 idle 的 r5 Linux，以及 `state-p6/windows.qcow2` 专用克隆；默认采集结束请求关闭外层 VM，仍须单独做冷盘校验。`--keep-running` 仅供后续恢复试验。
-- 本地合计 22 项 P6 测试通过；PDB 时钟 profile 已生成，四核部分运行证据见进度文档。新增恢复检查尚未运行。
+- 本地合计 26 项 P6 测试通过；PDB 时钟 profile 已生成，四核部分运行证据见进度文档。新增恢复检查尚未运行。
 
 共享页与时间字段依据微软的 [!kuser 文档](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-kuser)、[KUSER_SHARED_DATA 定义](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data) 和 [系统时间说明](https://learn.microsoft.com/en-us/windows/win32/sysinfo/system-time)。TSC 保留为诊断数据，验收器使用 Windows 系统时间区间，并核查其推进与 Linux 单调时钟一致。
 
