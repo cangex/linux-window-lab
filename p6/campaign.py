@@ -106,6 +106,7 @@ try:
     # This first run was already dispatched interactively. Its separate
     # finalizer must succeed; never replace failure evidence with a retry.
     initial = artifacts / 'r5-mp4-30m-02'
+    assert not (initial / 'invalidated.json').exists(), 'initial run was invalidated by evidence review'
     deadline = time.monotonic()+2700
     while True:
         assert not (artifacts / 'r5-mp4-30m-02-finalize-error.json').exists(), 'initial cold verification failed'

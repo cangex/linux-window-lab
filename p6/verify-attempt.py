@@ -3,8 +3,8 @@
 import argparse
 import importlib.util
 import json
-import re
 from pathlib import Path
+from evidence import kernel_anomalies
 
 
 def load_module(name):
@@ -67,8 +67,7 @@ def verify(directory):
     cpu_progress = [samples[-1]['cpus'][i]['CycleTime'] - samples[0]['cpus'][i]['CycleTime'] for i in range(before['cpus'])] if observed else []
     if any(delta <= 0 for delta in cpu_progress):
         errors.append('cpu_execution_not_advancing')
-    anomalies = [line for line in (directory / 'dmesg.txt').read_text().splitlines()
-                 if re.search(r'(?i)(\brcu\b.*\bstall\b|soft lockup|hard LOCKUP|\bBUG:|\bOops:|Kernel panic)', line)]
+    anomalies = kernel_anomalies((directory / 'dmesg.txt').read_text())
     if anomalies:
         errors.append('linux_kernel_anomaly')
     if observed and not semantics['passed']:

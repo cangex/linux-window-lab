@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import re
+from evidence import kernel_anomalies
 
 
 def rows(path):
@@ -65,8 +66,7 @@ def verify(out):
         matching = [r for r in truth if (r['pid'], r['created']) == identity]
         assert len({r['nonce'] for r in matching}) == 1, 'cold truth identity missing or ambiguous'
         workloads.append(workload.verify(matching, 4, minimum_seconds=5))
-    anomalies = [line for line in (out / 'dmesg.txt').read_text().splitlines()
-                 if re.search(r'(?i)(\brcu\b.*\bstall\b|soft lockup|hard LOCKUP|\bBUG:|\bOops:|Kernel panic)', line)]
+    anomalies = kernel_anomalies((out / 'dmesg.txt').read_text())
     assert not anomalies, anomalies
     return dict(independent_restart_passed=True, cycles=cycles, linux=linux, workloads=workloads,
                 formal_p6_acceptance=False, controlled_fault_matrix_complete=False,

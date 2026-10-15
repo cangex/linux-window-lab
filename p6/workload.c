@@ -4,6 +4,7 @@
  */
 #include <windows.h>
 #include <intrin.h>
+#include <io.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +56,10 @@ int main(void){
    (unsigned long long)begin,(unsigned long long)changed);
   for(unsigned i=0;i<cpus;i++)fprintf(log,"%s{\"cpu\":%u,\"loops\":%llu,\"errors\":%llu}",i?",":"",i,
    (unsigned long long)InterlockedCompareExchange64(&workers[i].loops,0,0),(unsigned long long)InterlockedCompareExchange64(&workers[i].errors,0,0));
-  fprintf(log,"]}\n");Sleep(1000);
+  fprintf(log,"]}\n");
+  /* Unbuffered stdio does not make NTFS data/length durable across a forced
+   * partition stop. Commit each complete truth record before the next epoch. */
+  if(fflush(log)||!FlushFileBuffers((HANDLE)_get_osfhandle(_fileno(log))))return 6;
+  Sleep(1000);
  }
 }
