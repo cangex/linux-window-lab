@@ -19,14 +19,14 @@ class Gate(unittest.TestCase):
   row=sample(0);row['node_free_gib']['node0']=3
   self.assertEqual(g.assess(row),['node_free_gib'])
  def test_unused_nodes_do_not_block(self):
-  row=sample(0);row['node_free_gib'].update(node4=0.1,node6=0.1)
+  row=sample(0);row['node_free_gib'].update(node4=0.1,node5=0.1,node6=0.1,node7=0.1)
   self.assertEqual(g.assess(row),[])
  def test_missing_selected_node_blocks(self):
-  row=sample(0);del row['node_free_gib']['node7']
+  row=sample(0);del row['node_free_gib']['node3']
   self.assertEqual(g.assess(row),['node_free_gib'])
  def test_old_policy_or_mislabelled_samples_block(self):
   rows=[sample(t) for t in range(0,601,60)]
-  rows[4]['policy']='old';self.assertFalse(g.stable(rows,600))
+  rows[4]['policy']='p6-selected-numa-v2';self.assertFalse(g.stable(rows,600))
   rows[4]['policy']=g.POLICY;rows[4]['node_free_gib']['node2']=1
   self.assertFalse(g.stable(rows,600))
 if __name__=='__main__':unittest.main()

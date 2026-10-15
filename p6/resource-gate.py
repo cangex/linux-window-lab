@@ -3,9 +3,9 @@
 import argparse,json,time
 from pathlib import Path
 
-POLICY = "p6-selected-numa-v2"
-SELECTED_NODES = ("node0", "node1", "node2", "node3", "node7")
-NODESET = "0-3,7"
+POLICY = "p6-selected-numa-v3"
+SELECTED_NODES = ("node0", "node1", "node2", "node3")
+NODESET = "0-3"
 
 def assess(sample):
  reasons=[]

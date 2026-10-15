@@ -26,7 +26,7 @@
 
 共享页与时间字段依据微软的 [!kuser 文档](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-kuser)、[KUSER_SHARED_DATA 定义](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data) 和 [系统时间说明](https://learn.microsoft.com/en-us/windows/win32/sysinfo/system-time)。TSC 保留为诊断数据，验收器使用 Windows 系统时间区间，并核查其推进与 Linux 单调时钟一致。
 
-## 资源准入（试跑规则 v2：仅检查实际使用的 NUMA 节点）
+## 资源准入（试跑规则 v3：仅检查实际使用的 NUMA 节点）
 
 每 60 秒采样；连续 600 秒所有采样通过、相邻采样间隔不超过 90 秒：
 
@@ -34,15 +34,15 @@
 | --- | --- |
 | MemAvailable | ≥128 GiB |
 | MemFree | ≥64 GiB |
-| VM 使用节点 0/1/2/3/7 的 MemFree | 每节点 ≥4 GiB |
+| VM 使用节点 0/1/2/3 的 MemFree | 每节点 ≥4 GiB |
 | memory PSI some avg10 | <1% |
 | 实验卷可用磁盘 | ≥80 GiB |
 
-用户已授权不再要求全部 NUMA 节点达标。boot/dev VM 的宿主内存交错分配限定为 `0-3,7`；guest 内部 NUMA 描述不变。未使用节点的低空闲不阻止准入，但整机内存、PSI、磁盘和所用节点门限仍检查。
+用户已授权不再要求全部 NUMA 节点达标。boot/dev VM 的宿主内存交错分配限定为 `0-3`；guest 内部 NUMA 描述不变。未使用节点的低空闲不阻止准入，但整机内存、PSI、磁盘和所用节点门限仍检查。
 
-新记录携带 `p6-selected-numa-v2` 策略版本，旧策略记录不能充当新连续窗口。缺失、过期、所用节点压力事件会阻止准入；采集器核对 VM 实际配置与策略一致。修改后 P6 本地 20 项测试和 P5 的 15 项回归测试通过。
+新记录携带 `p6-selected-numa-v3` 策略版本，旧策略记录不能充当新连续窗口。缺失、过期、所用节点压力事件会阻止准入；采集器核对 VM 实际配置与策略一致。修改后 P6 本地 20 项测试和 P5 的 15 项回归测试通过。
 当前门限用于恢复试跑，正式长稳前还需冻结资源分配/矩阵/停止规则。
-持续压力下暂停新增负载；构建 VM 配置为 8 GiB、内存跨 0/1/2/3/7 节点交错、构建并发 2；构建已结束，VM 已关机。
+持续压力下暂停新增负载；构建 VM 配置为 8 GiB、内存跨 0/1/2/3 节点交错、构建并发 2；构建已结束，VM 已关机。
 
 ```sh
 python3 p6/resource-gate.py --history artifacts/p6/resource-history.jsonl
