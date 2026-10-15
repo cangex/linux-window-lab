@@ -12,22 +12,26 @@ from pathlib import Path
 import struct
 import subprocess
 import sys
+from firmware import firmware as resolve_firmware
 
 p = argparse.ArgumentParser()
 p.add_argument('source', type=Path)
 p.add_argument('output', type=Path)
 p.add_argument('--cpus', type=int, choices=(1, 2, 4), required=True)
 p.add_argument('--iasl', required=True)
+p.add_argument('--source-mode', choices=('r5','hal-enforce'), default='r5')
 a = p.parse_args()
 assert not a.output.exists()
 layout = json.loads((a.source / 'layout.json').read_text())
 original = (a.source / 'partition.bin').read_bytes()
 source_hash = hashlib.sha256(original).hexdigest()
-assert source_hash == layout['payload_sha256'] == 'a85083a518da38af987ebca63f9d76aa22b111a5cb8eb2752e6c1e2af522fa1f'
+assert source_hash == layout['payload_sha256'] == resolve_firmware('/unused',4,a.source_mode)[1]
 a.output.mkdir(parents=True)
 stage = a.output / 'stage'
-subprocess.run([sys.executable, str(Path(__file__).with_name('stage.py')), str(stage),
-                '--cpus', str(a.cpus), '--disk', str(a.source / 'partition.bin')], check=True)
+command=[sys.executable, str(Path(__file__).with_name('stage.py')), str(stage),
+         '--cpus', str(a.cpus), '--disk', str(a.source / 'partition.bin')]
+if a.source_mode=='hal-enforce':command+=['--hal-ipi-mode','enforce']
+subprocess.run(command,check=True)
 spec = importlib.util.spec_from_file_location('pack', stage / 'pack.py')
 pack = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pack)

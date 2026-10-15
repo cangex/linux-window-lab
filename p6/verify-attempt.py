@@ -4,7 +4,7 @@ import argparse
 import importlib.util
 import json
 from pathlib import Path
-from evidence import kernel_anomalies
+from evidence import kernel_anomalies,hal_errors
 
 
 def load_module(name):
@@ -63,10 +63,7 @@ def verify(directory):
     samples = [row for row in observations if row['event'] == 'sample']
     if before.get('firmware_mode') == 'hal-enforce':
         serial = (directory / 'uefi-serial.txt').read_text()
-        if 'HAL probe matches=1 ' not in serial or 'HAL NoShorthand enforced=1 version=26100.1742' not in serial:
-            errors.append('hal_boot_adaptation_missing')
-        if observed and (not samples or any(row.get('hal_no_shorthand') != 1 for row in samples)):
-            errors.append('hal_no_shorthand_not_retained')
+        errors.extend(hal_errors(serial,samples,observed))
     for row in samples:
         if [(cpu['Number'], cpu['InitialApicId']) for cpu in row['cpus']] != [(i, 4+i) for i in range(before['cpus'])]:
             raise ValueError('unexpected observed CPU ownership')

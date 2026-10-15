@@ -43,6 +43,8 @@ def verify(out):
         assert len(parked) == 1 and int(parked[0]) >= 1 << 63
         nonces.append(int(parked[0]))
         first, last = result['running_before'], result['running_after']
+        if before.get('firmware_mode') == 'hal-enforce':
+            assert all(r.get('hal_no_shorthand') == 1 for r in (initial['running'],first,last)), 'HAL flag missing across restart'
         previous_boot = initial['running']['windows_boot_id']
         assert first['windows_boot_id'] == last['windows_boot_id'] != previous_boot
         assert last['interrupt_time_100ns'] > first['interrupt_time_100ns']
