@@ -28,6 +28,8 @@ try:
  assert guest('uname -r').strip()=='6.18.0-rc3-lwlab-p6'
  assert guest('sha256sum /boot/vmlinuz-6.18.0-rc3-lwlab-p6').split()[0]=='6309c7f909e2205f96d9d9caca5b928b6e4495b3a878826c381c42d1dc24108c'
  assert guest('cat /sys/kernel/lwlab/status').startswith('state=idle ')
+ firmware=guest('sha256sum /lib/firmware/lwlab/partition-p3.bin').split()[0]
+ assert firmware==json.loads((repo/'p6/firmware-sha256.json').read_text())[str(a.cpus)],'CPU-specific firmware mismatch'
  xml=run(['sudo','-n','virsh','dumpxml','lwlab-boot']).stdout
  assert '/state-p6/windows.qcow2' in xml,'dedicated P6 disk clone required'
  tuning=ET.fromstring(xml).find('numatune')
