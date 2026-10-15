@@ -25,12 +25,16 @@ snapshot = out / 'windows.qcow2'
 assert not snapshot.exists()
 shutil.copy2(disk, snapshot)
 chain = json.loads(subprocess.check_output(['qemu-img', 'info', '--output=json', '--backing-chain', str(snapshot)], text=True))
-assert len(chain) == 3
+assert len(chain) in (3,4)
 expected = [root / 'state-p6-activation/windows.qcow2', root / 'state-p5-install/windows.qcow2']
-assert [Path(x['filename']).resolve() for x in chain[1:]] == expected
 backing_hashes = dict(zip(map(str, expected), (
     'cf1b7bc98a2e92fc5cce089db7c5a4664fd72375bec06538ecf16f0ed4f4724a',
     '21dfa48d805d7f11b76f493b2ff0943ad727a25b8a0653edc33d22f9bbb5f2f9')))
+if len(chain)==4:
+    durable=root/'state-p6-durable/windows.qcow2'
+    expected.insert(0,durable)
+    backing_hashes[str(durable)]='23de1c94fc58f18c530109b1a34887518f0a29756f6886761573f2281351a7c4'
+assert [Path(x['filename']).resolve() for x in chain[1:]] == expected
 for path, digest in backing_hashes.items():
     with open(path, 'rb') as file:
         assert hashlib.file_digest(file, 'sha256').hexdigest() == digest, 'immutable backing changed'

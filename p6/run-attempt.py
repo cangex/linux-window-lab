@@ -27,6 +27,7 @@ def run(args,**kw):return subprocess.run(list(map(str,args)),check=True,text=Tru
 ssh=['ssh','-i',str(root/'keys/guest_ed25519'),'-o','BatchMode=yes','-o','ConnectTimeout=8','lab@192.168.231.11']
 def guest(command):return run(ssh+[command]).stdout
 processes=[];files=[];failure=None;started=False;shutdown_requested=False;domain_state=None
+serial=root/'artifacts/p1/serial1.log';serial_offset=serial.stat().st_size
 try:
  latest(True)
  assert guest('uname -r').strip()=='6.18.0-rc3-lwlab-p6'
@@ -62,6 +63,7 @@ try:
  if not a.no_observe:
   command=f'sudo timeout {a.seconds+400} python3 /tmp/p6-run/p6/observe.py /tmp/p6-run/p6/p6-cpu-profile.json --seconds {a.seconds} --cpus {a.cpus}'
   if a.windows_clock:command+=' --windows-clock'
+  if a.firmware_mode!='r5':command+=' --hal-ipi-mode '+a.firmware_mode.removeprefix('hal-')
   observe=launch(ssh+[command],out/'observations.jsonl')
  deadline=time.monotonic()+a.seconds+480;checked=0
  with (out/'resources.jsonl').open('w') as resources:
@@ -77,6 +79,8 @@ except BaseException as exc:
  failure=repr(exc)
 finally:
  if started:
+  try:(out/'uefi-serial.txt').write_text(run(['sudo','-n','tail','-c',f'+{serial_offset+1}',serial]).stdout)
+  except Exception as exc:(out/'uefi-serial.error').write_text(repr(exc))
   for name,command in [('dmesg.txt','sudo dmesg'),('status.txt','cat /sys/kernel/lwlab/status')]:
    try:(out/name).write_text(guest(command))
    except Exception as exc:(out/(name+'.error')).write_text(repr(exc))

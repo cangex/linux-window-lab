@@ -21,6 +21,12 @@ def read_rows(path):
 def select_truth(truth, observations):
     """Select by externally observed identity, not the last record on disk."""
     samples = [row for row in observations if row['event'] == 'sample']
+    if before.get('firmware_mode') == 'hal-enforce':
+        serial = (directory / 'uefi-serial.txt').read_text()
+        if 'HAL probe matches=1 ' not in serial or 'HAL NoShorthand enforced=1 version=26100.1742' not in serial:
+            errors.append('hal_boot_adaptation_missing')
+        if observed and (not samples or any(row.get('hal_no_shorthand') != 1 for row in samples)):
+            errors.append('hal_no_shorthand_not_retained')
     identities = {(row['target']['pid'], row['target']['created']) for row in samples}
     if len(identities) != 1:
         raise ValueError('expected one observed workload identity')

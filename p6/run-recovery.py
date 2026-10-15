@@ -11,10 +11,12 @@ from pathlib import Path
 import shlex
 import subprocess
 import time
+from firmware import firmware as resolve_firmware
 
 p = argparse.ArgumentParser()
 p.add_argument('name')
 p.add_argument('--cycles', type=int, choices=(1, 10), default=1)
+p.add_argument('--firmware-mode', choices=('r5','hal-enforce'), default='r5')
 a = p.parse_args()
 assert a.name.replace('-', '').replace('_', '').isalnum()
 root = Path('/data/linux-window-lab')
@@ -63,7 +65,7 @@ try:
     resource(True)
     assert guest('uname -r').strip() == '6.18.0-rc3-lwlab-p6'
     assert guest('sha256sum /boot/vmlinuz-6.18.0-rc3-lwlab-p6').split()[0] == '6309c7f909e2205f96d9d9caca5b928b6e4495b3a878826c381c42d1dc24108c'
-    assert guest('sha256sum /lib/firmware/lwlab/partition-p3.bin').split()[0] == 'a85083a518da38af987ebca63f9d76aa22b111a5cb8eb2752e6c1e2af522fa1f'
+    assert guest('sha256sum /lib/firmware/lwlab/partition-p3.bin').split()[0] == resolve_firmware(root,4,a.firmware_mode)[1]
     before = guest('cat /sys/kernel/lwlab/status')
     assert 'stage=3 ' in before and 'started=1 ' in before
     bootid = guest('cat /proc/sys/kernel/random/boot_id').strip()
@@ -73,7 +75,7 @@ try:
     assert memory is not None and memory.get('nodeset') == gate.NODESET and memory.get('mode') == 'interleave'
     assert '/state-p6/windows.qcow2' in xml
     (out / 'vm.xml').write_text(xml)
-    (out / 'before.json').write_text(json.dumps(dict(boot_id=bootid, status=before, cycles=a.cycles)))
+    (out / 'before.json').write_text(json.dumps(dict(boot_id=bootid, status=before, cycles=a.cycles,firmware_mode=a.firmware_mode)))
     guest('test ! -e ' + shlex.quote(stop))
     run(['scp', '-i', root / 'keys/guest_ed25519', repo / 'p6/recover.py', repo / 'p6/recovery-probe.py', repo / 'p6/windows_clock.py',
          root / 'artifacts/p6/p6-cpu-profile-recovery.json',
@@ -91,7 +93,9 @@ try:
     for cycle in range(a.cycles):
         resource()
         log = out / f'cycle-{cycle+1:02}.jsonl'
-        proc = launch(ssh + ['sudo timeout 330 python3 /tmp/p6-run/p6/recover.py /tmp/p6-run/p6/p6-cpu-profile-recovery.json'], log)
+        command='sudo timeout 330 python3 /tmp/p6-run/p6/recover.py /tmp/p6-run/p6/p6-cpu-profile-recovery.json'
+        if a.firmware_mode=='hal-enforce':command+=' --require-no-shorthand'
+        proc = launch(ssh + [command], log)
         deadline = time.monotonic()+345
         while proc.poll() is None:
             resource()

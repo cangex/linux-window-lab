@@ -1,4 +1,10 @@
 {
+  "hal-enforce": {
+    "4": {
+      "directory": "firmware-hal-enforce",
+      "sha256": "d71189ccd4eb95ed5a470ddf410e614e4743bbfa4e7cd67b019fa2301b3a294a"
+    }
+  },
   "hal-probe": {
     "4": {
       "directory": "firmware-hal-probe",

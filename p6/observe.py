@@ -7,7 +7,8 @@ from observer import Physical,Virtual,bootstrap,processes,modules,Unavailable
 from windows_clock import read_clock,UnstableClock
 p=argparse.ArgumentParser();p.add_argument('profile',type=Path);p.add_argument('--seconds',type=int,required=True)
 p.add_argument('--cpus',type=int,choices=(1,2,4),required=True);p.add_argument('--interval',type=float,default=.5)
-p.add_argument('--windows-clock',action='store_true');a=p.parse_args()
+p.add_argument('--windows-clock',action='store_true')
+p.add_argument('--hal-ipi-mode',choices=('probe','enforce'));a=p.parse_args()
 if a.seconds<=0 or a.interval<=0:p.error('positive duration and interval required')
 clock=ctypes.CDLL(str(Path(__file__).with_name('clock.so')));clock.lw_tsc.restype=ctypes.c_uint64
 profile=json.loads(a.profile.read_text());started=time.monotonic();boot=None
@@ -27,11 +28,14 @@ while boot is None:
   time.sleep(2)
 print(json.dumps(dict(event='bootstrap',**boot,seconds=time.monotonic()-started,address_helper_used=False,physical_bytes=memory.bytes)),flush=True)
 v=Virtual(memory,boot['cr3']);off=profile['types']['_KPRCB']['fields'];kernel=boot['kernel']
+if a.hal_ipi_mode:assert boot['pdb'].upper()=='953A8DE880B0818C32DA2DEC1D79C2D91','HAL adaptation profile mismatch'
 end=time.monotonic()+a.seconds;valid=unavailable=0
 while time.monotonic()<end:
  begin=time.monotonic_ns();tsc_begin=clock.lw_tsc();before=memory.bytes;calls=memory.calls
  windows_begin=windows_end=None
  try:
+  no_shorthand=v.read(kernel+0xe0fc1c,1)[0] if a.hal_ipi_mode else None
+  if a.hal_ipi_mode=='enforce':assert no_shorthand==1,'HAL NoShorthand was not retained'
   if a.windows_clock:
    seed=next((x for x in processes(memory,profile,boot) if x['name'].lower()=='lwtruth.exe'),None)
    if not seed:raise Unavailable('workload process absent')
@@ -54,7 +58,7 @@ while time.monotonic()<end:
    children=[x for x in ps if x['name'].lower()=='lwchild.exe'],
    module=next((x['base'] for x in us if x['name'].lower()=='lwlifecycle.dll'),0),
    kernel_module=next(x for x in ks if x['name'].lower()=='ntoskrnl.exe'),
-   process_count=len(ps),kernel_module_count=len(ks),cpus=cpu_rows)
+   process_count=len(ps),kernel_module_count=len(ks),cpus=cpu_rows,hal_no_shorthand=no_shorthand)
   valid+=1
  except (Unavailable,UnstableClock,UnicodeError,StopIteration) as error:
   unavailable+=1;row=dict(event='unavailable',reason=str(error),generation=memory.generation)

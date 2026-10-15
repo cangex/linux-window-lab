@@ -8,7 +8,8 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'p5'))
 from observer import Physical,Virtual,bootstrap,processes,Unavailable
 from windows_clock import SHARED_USER_DATA,read_clock
-p=argparse.ArgumentParser();p.add_argument('profile',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('profile',type=Path)
+p.add_argument('--require-no-shorthand',action='store_true');a=p.parse_args()
 assert socket.gethostname()=='lwlab-boot'
 assert os.uname().release=='6.18.0-rc3-lwlab-p6'
 status=Path('/sys/kernel/lwlab/status');control=Path('/sys/kernel/lwlab/control')
@@ -44,7 +45,12 @@ def running(memory,boot):
  cv=Virtual(memory,target['cr3']);shared=profile['types']['_KUSER_SHARED_DATA']['fields']
  uptime=read_clock(cv,profile,boot['build'],'InterruptTime')
  boot_id=cv.u32(SHARED_USER_DATA+shared['BootId'])
- return dict(target=target,cpus=cpus,windows_boot_id=boot_id,interrupt_time_100ns=uptime)
+ no_shorthand=None
+ if a.require_no_shorthand:
+  assert boot['pdb'].upper()=='953A8DE880B0818C32DA2DEC1D79C2D91'
+  no_shorthand=v.read(kernel+0xe0fc1c,1)[0]
+  assert no_shorthand==1,'HAL NoShorthand was not retained across recovery'
+ return dict(target=target,cpus=cpus,windows_boot_id=boot_id,interrupt_time_100ns=uptime,hal_no_shorthand=no_shorthand)
 profile=json.loads(a.profile.read_text());bootid=Path('/proc/sys/kernel/random/boot_id').read_text()
 old=Physical();before=bootstrap(old,profile);old_running=running(old,before);previous=state();report('before',state=previous,bootstrap=before,running=old_running,linux_boot_id=bootid.strip())
 command('stop');stopped=state();report('stop',state=stopped)
